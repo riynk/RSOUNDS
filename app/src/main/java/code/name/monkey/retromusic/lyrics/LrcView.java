@@ -397,7 +397,9 @@ public class LrcView extends View {
     public void setTranslation(int index, String translation) {
         if (index < 0 || index >= mLrcEntryList.size()) return;
         mLrcEntryList.get(index).setSecondText(translation);
+        float previousOffset = mOffset;
         initEntryList();
+        mOffset = previousOffset;
         postInvalidate();
     }
 
@@ -405,8 +407,8 @@ public class LrcView extends View {
 
     public void setLyricStyle(float fontScale, float lineSpacing) {
         float scale = Math.max(0.75f, Math.min(1.5f, fontScale));
-        mCurrentTextSize = getResources().getDimension(R.dimen.lrc_text_size) * scale;
-        mNormalTextSize = mCurrentTextSize;
+        mCurrentTextSize = getResources().getDimension(R.dimen.lrc_current_text_size) * scale;
+        mNormalTextSize = getResources().getDimension(R.dimen.lrc_text_size) * scale;
         mDividerHeight = getResources().getDimension(R.dimen.lrc_divider_height) * Math.max(0.8f, Math.min(1.8f, lineSpacing));
         mLrcPaint.setTextSize(mCurrentTextSize);
         initEntryList();
