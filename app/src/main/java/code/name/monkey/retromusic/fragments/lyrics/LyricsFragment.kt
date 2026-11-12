@@ -43,6 +43,7 @@ import code.name.monkey.retromusic.fragments.base.AbsMainActivityFragment
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicProgressViewUpdateHelper
 import code.name.monkey.retromusic.lyrics.LrcView
+import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.model.AudioTagInfo
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.FileUtils
@@ -124,6 +125,8 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         val textColorValue = TypedValue()
         requireContext().theme.resolveAttribute(android.R.attr.textColorPrimary, textColorValue, true)
         binding.lyricsView.apply {
+            setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
+            setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
             setCurrentColor(textColorValue.data)
             setTimeTextColor(accentColor())
             setTimelineColor(accentColor())
@@ -156,12 +159,14 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     override fun onPlayingMetaChanged() {
         super.onPlayingMetaChanged()
         updateTitleSong()
+        binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
         loadLyrics()
     }
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         updateTitleSong()
+        binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
         loadLyrics()
     }
 
