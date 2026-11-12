@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.preference.PreferenceManager
 import code.name.monkey.appthemehelper.util.ToolbarContentTintHelper
 import code.name.monkey.retromusic.NEW_BLUR_AMOUNT
+import code.name.monkey.retromusic.SHOW_LYRICS
 import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentLyricsPlayerBinding
@@ -88,13 +89,21 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         }
         binding.lyricsButton.setOnClickListener {
             toggleLyricsAction()
+            updateLyricsButtonState()
         }
+        updateLyricsButtonState()
         binding.favoriteButton.setOnClickListener {
             toggleFavorite(MusicPlayerRemote.currentSong)
         }
         binding.queueButton.setOnClickListener {
             openPlayingQueueAction()
         }
+    }
+
+    private fun updateLyricsButtonState() {
+        binding.lyricsButton.setImageResource(
+            if (PreferenceUtil.showLyrics) R.drawable.ic_lyrics else R.drawable.ic_lyrics_outline
+        )
     }
 
     private fun setUpPlayerToolbar() {
@@ -197,6 +206,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == SHOW_LYRICS) updateLyricsButtonState()
         if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source" || key == "lyrics_type") {
             updateBlur()
         }
