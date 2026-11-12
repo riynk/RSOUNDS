@@ -258,6 +258,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         PreferenceManager.getDefaultSharedPreferences(requireContext())
             .unregisterOnSharedPreferenceChangeListener(this)
         progressViewUpdateHelper?.stop()
+        translationJob?.cancel()
         _binding = null
     }
 }
