@@ -184,11 +184,12 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         val currentSongPath = song.data
         val lines = binding.lyricsView.lyricTexts
         translationJob = viewLifecycleOwner.lifecycleScope.launch {
+            val translations = MutableList(lines.size) { "" }
             lines.forEachIndexed { index, line ->
                 if (currentSongPath != song.data) return@launch
-                val translated = LyricsPreferences.translate(requireContext(), line)
-                if (!translated.isNullOrBlank() && currentSongPath == song.data) {
-                    binding.lyricsView.setTranslation(index, translated)
+                translations[index] = LyricsPreferences.translate(requireContext(), line).orEmpty()
+                if (index % 8 == 7 || index == lines.lastIndex) {
+                    if (currentSongPath == song.data) binding.lyricsView.setTranslations(translations)
                 }
             }
         }
@@ -482,7 +483,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
                 translationJob?.cancel()
                 translationSongPath = null
                 if (!LyricsPreferences.translationEnabled(requireContext())) {
-                    binding.lyricsView.lyricTexts.indices.forEach { binding.lyricsView.setTranslation(it, "") }
+                    binding.lyricsView.clearTranslations()
                     if (lyricsType == LyricsType.NORMAL_LYRICS) loadNormalLyrics()
                 } else if (lyricsType == LyricsType.NORMAL_LYRICS) {
                     loadNormalLyrics()
