@@ -83,6 +83,7 @@ public class LrcView extends View {
     private boolean isTouching;
     private boolean isFling;
     private int mTextGravity;
+    private long mTimeOffsetMs = 0L;
     private final Runnable hideTimelineRunnable =
             new Runnable() {
                 @Override
@@ -147,7 +148,7 @@ public class LrcView extends View {
                         float y = e.getY() - mOffset;
                         int tappedLine = getTappedLine(y);
                         if (tappedLine >= 0 && tappedLine < mLrcEntryList.size()) {
-                            long tappedLineTime = mLrcEntryList.get(tappedLine).getTime();
+                            long tappedLineTime = mLrcEntryList.get(tappedLine).getTime() - mTimeOffsetMs;
                             if (mOnPlayClickListener.onPlayClick(tappedLineTime)) {
                                 isShowTimeline = false;
                                 removeCallbacks(hideTimelineRunnable);
@@ -382,7 +383,20 @@ public class LrcView extends View {
         return !mLrcEntryList.isEmpty();
     }
 
+    public void setTimeOffsetMs(long offsetMs) { mTimeOffsetMs = offsetMs; }
+
+    public void setLyricStyle(float fontScale, float lineSpacing) {
+        float scale = Math.max(0.75f, Math.min(1.5f, fontScale));
+        mCurrentTextSize = getResources().getDimension(R.dimen.lrc_text_size) * scale;
+        mNormalTextSize = mCurrentTextSize;
+        mDividerHeight = getResources().getDimension(R.dimen.lrc_divider_height) * Math.max(0.8f, Math.min(1.8f, lineSpacing));
+        mLrcPaint.setTextSize(mCurrentTextSize);
+        initEntryList();
+        postInvalidate();
+    }
+
     public void updateTime(long time) {
+        time += mTimeOffsetMs;
         runOnUi(
                 () -> {
                     if (!hasLrc()) {
