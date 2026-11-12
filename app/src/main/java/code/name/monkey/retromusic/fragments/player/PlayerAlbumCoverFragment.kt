@@ -28,7 +28,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
 import kotlinx.coroutines.launch
-import code.name.monkey.appthemehelper.util.ColorUtil
 import code.name.monkey.appthemehelper.util.MaterialValueHelper
 import code.name.monkey.retromusic.LYRICS_TYPE
 import code.name.monkey.retromusic.R
@@ -134,11 +133,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     private fun setupViewPager() {
         binding.viewPager.addOnPageChangeListener(this)
-        val nps = PreferenceUtil.nowPlayingScreen
-
-        if (false) {
-            binding.viewPager.offscreenPageLimit = 2
-        } else if (PreferenceUtil.isCarouselEffect) {
+        if (PreferenceUtil.isCarouselEffect) {
             val metrics = resources.displayMetrics
             val ratio = metrics.heightPixels.toFloat() / metrics.widthPixels.toFloat()
             binding.viewPager.clipToPadding = false
@@ -296,13 +291,10 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             surfaceColor().isColorLight
         )
 
-        when (PreferenceUtil.nowPlayingScreen) {
-            Default -> if (PreferenceUtil.isAdaptiveColor) {
-                setLRCViewColors(color.primaryTextColor, color.secondaryTextColor)
-            } else {
-                setLRCViewColors(primaryColor, secondaryColor)
-            }
-            else -> setLRCViewColors(primaryColor, secondaryColor)
+        if (PreferenceUtil.isAdaptiveColor) {
+            setLRCViewColors(color.primaryTextColor, color.secondaryTextColor)
+        } else {
+            setLRCViewColors(primaryColor, secondaryColor)
         }
     }
 

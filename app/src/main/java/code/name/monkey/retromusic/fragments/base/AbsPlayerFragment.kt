@@ -60,7 +60,6 @@ import code.name.monkey.retromusic.extensions.keepScreenOn
 import code.name.monkey.retromusic.extensions.showToast
 import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.LibraryViewModel
-import code.name.monkey.retromusic.fragments.NowPlayingScreen
 import code.name.monkey.retromusic.fragments.ReloadType
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
@@ -346,15 +345,9 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
     @SuppressLint("ClickableViewAccessibility")
     override fun onResume() {
         super.onResume()
-        val nps = PreferenceUtil.nowPlayingScreen
-
-        if (false) {
-            playerToolbar()?.menu?.removeItem(R.id.action_toggle_lyrics)
-        } else {
-            playerToolbar()?.menu?.findItem(R.id.action_toggle_lyrics)?.apply {
-                isChecked = PreferenceUtil.showLyrics
-                showLyricsIcon(this)
-            }
+        playerToolbar()?.menu?.findItem(R.id.action_toggle_lyrics)?.apply {
+            isChecked = PreferenceUtil.showLyrics
+            showLyricsIcon(this)
         }
     }
 

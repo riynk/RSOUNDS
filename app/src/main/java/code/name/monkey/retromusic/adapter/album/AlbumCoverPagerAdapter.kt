@@ -145,8 +145,7 @@ class AlbumCoverPagerAdapter(
         }
 
         private fun getLayoutWithPlayerTheme(): Int {
-            return run {
-                    if (PreferenceUtil.isCarouselEffect) {
+            return if (PreferenceUtil.isCarouselEffect) {
                         R.layout.fragment_album_carousel_cover
                     } else {
                         when (PreferenceUtil.albumCoverStyle) {
@@ -157,7 +156,6 @@ class AlbumCoverPagerAdapter(
                             AlbumCoverStyle.Full -> R.layout.fragment_album_full_cover
                             AlbumCoverStyle.FullCard -> R.layout.fragment_album_full_card_cover
                         }
-                    }
             }
         }
 
