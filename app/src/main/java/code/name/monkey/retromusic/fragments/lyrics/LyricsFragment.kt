@@ -46,6 +46,7 @@ import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicProgressViewUpdateHelper
 import code.name.monkey.retromusic.lyrics.LrcView
 import code.name.monkey.retromusic.lyrics.LyricsPreferences
+import code.name.monkey.retromusic.lyrics.LyricsTranslationDialog
 import code.name.monkey.retromusic.glide.BlurTransformation
 import code.name.monkey.retromusic.glide.RetroGlideExtension
 import code.name.monkey.retromusic.glide.RetroGlideExtension.simpleSongCoverOptions
@@ -260,6 +261,14 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
             R.id.action_search -> openUrl(googleSearchLrcUrl)
             R.id.action_sync -> adjustLyricsSync()
             R.id.action_sync_rate -> adjustLyricsRate()
+            R.id.action_translate_lyrics -> {
+                val lines = if (lyricsType == LyricsType.SYNCED_LYRICS) {
+                    binding.lyricsView.lyricTexts
+                } else {
+                    binding.normalLyrics.text.toString().lines()
+                }
+                LyricsTranslationDialog.show(this, lines)
+            }
             else -> return false
         }
         return true
