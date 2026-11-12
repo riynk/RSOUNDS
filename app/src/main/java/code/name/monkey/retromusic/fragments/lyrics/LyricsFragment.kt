@@ -51,6 +51,7 @@ import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.util.UriUtil
 import com.afollestad.materialdialogs.input.input
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import org.jaudiotagger.audio.AudioFileIO
 import org.jaudiotagger.tag.FieldKey
 import java.io.File
@@ -84,6 +85,8 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         }
 
     private lateinit var updateHelper: MusicProgressViewUpdateHelper
+    private var translationJob: Job? = null
+    private var translationSongPath: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,6 +143,25 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
 
     override fun onUpdateProgressViews(progress: Int, total: Int) {
         binding.lyricsView.updateTime(progress.toLong())
+        startLyricTranslations()
+    }
+
+    private fun startLyricTranslations() {
+        if (!LyricsPreferences.translationEnabled(requireContext()) || !binding.lyricsView.hasLrc()) return
+        if (translationSongPath == song.data) return
+        translationJob?.cancel()
+        translationSongPath = song.data
+        val currentSongPath = song.data
+        val lines = binding.lyricsView.lyricTexts
+        translationJob = viewLifecycleOwner.lifecycleScope.launch {
+            lines.forEachIndexed { index, line ->
+                if (currentSongPath != song.data) return@launch
+                val translated = LyricsPreferences.translate(requireContext(), line)
+                if (!translated.isNullOrBlank() && currentSongPath == song.data) {
+                    binding.lyricsView.setTranslation(index, translated)
+                }
+            }
+        }
     }
 
     private fun setupViews() {
@@ -158,6 +180,8 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
 
     override fun onPlayingMetaChanged() {
         super.onPlayingMetaChanged()
+        translationJob?.cancel()
+        translationSongPath = null
         updateTitleSong()
         binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
         loadLyrics()
@@ -371,6 +395,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         super.onDestroyView()
         if (MusicPlayerRemote.playingQueue.isNotEmpty())
             mainActivity.expandPanel()
+        translationJob?.cancel()
         _binding = null
     }
 
