@@ -1,0 +1,58 @@
+name: Restore repository from uploaded ZIP
+
+on:
+  push:
+    paths:
+      - ".github/workflows/restore-from-zip.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout RY-DEV
+        uses: actions/checkout@v4
+        with:
+          ref: RY-DEV
+          fetch-depth: 0
+
+      - name: Validate and extract repository archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="RetroMusicPlayer-dev.zip"
+          test -f "$ARCHIVE"
+          unzip -tq "$ARCHIVE"
+          rm -rf /tmp/rsounds-restore
+          mkdir -p /tmp/rsounds-restore
+          unzip -q "$ARCHIVE" -d /tmp/rsounds-restore
+
+          mapfile -t ROOT_ITEMS < <(find /tmp/rsounds-restore -mindepth 1 -maxdepth 1 -print)
+          if [ "${#ROOT_ITEMS[@]}" -eq 1 ] && [ -d "${ROOT_ITEMS[0]}" ]; then
+            SOURCE_DIR="${ROOT_ITEMS[0]}"
+          else
+            SOURCE_DIR="/tmp/rsounds-restore"
+          fi
+
+          test -n "$(find "$SOURCE_DIR" -mindepth 1 -maxdepth 1 -print -quit)"
+          rsync -a --delete --exclude='.git/' "$SOURCE_DIR/" "$GITHUB_WORKSPACE/"
+
+      - name: Remove workflow definitions as previously requested
+        shell: bash
+        run: rm -rf .github/workflows
+
+      - name: Commit and push restored repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Archive contents are identical to the current branch; no commit needed."
+            exit 0
+          fi
+          git commit -m "Restore repository contents from uploaded ZIP"
+          git push origin HEAD:RY-DEV
