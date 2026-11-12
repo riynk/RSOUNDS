@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.preference.PreferenceManager
 import code.name.monkey.appthemehelper.util.ToolbarContentTintHelper
 import code.name.monkey.retromusic.NEW_BLUR_AMOUNT
+import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentBlurBinding
 import code.name.monkey.retromusic.extensions.drawAboveSystemBars
@@ -33,9 +34,12 @@ import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
 import code.name.monkey.retromusic.glide.BlurTransformation
 import code.name.monkey.retromusic.glide.RetroGlideExtension
 import code.name.monkey.retromusic.glide.RetroGlideExtension.simpleSongCoverOptions
+import code.name.monkey.retromusic.glide.RetroGlideExtension.artistImageOptions
 import code.name.monkey.retromusic.glide.crossfadeListener
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.model.Song
+import code.name.monkey.retromusic.model.Album
+import code.name.monkey.retromusic.model.Artist
 import code.name.monkey.retromusic.util.PreferenceUtil.blurAmount
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import com.bumptech.glide.Glide
@@ -115,18 +119,23 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
 
     private fun updateBlur() {
         // https://github.com/bumptech/glide/issues/527#issuecomment-148840717
-        Glide.with(this)
-            .load(RetroGlideExtension.getSongModel(MusicPlayerRemote.currentSong))
-            .simpleSongCoverOptions(MusicPlayerRemote.currentSong)
-            .transform(
-                BlurTransformation.Builder(requireContext()).blurRadius(blurAmount.toFloat())
-                    .build()
-            ).thumbnail(lastRequest)
+        val song = MusicPlayerRemote.currentSong
+        val blur = BlurTransformation.Builder(requireContext()).blurRadius(blurAmount.toFloat()).build()
+        val metadataRequest = Glide.with(this).load(RetroGlideExtension.getSongModel(song))
+            .simpleSongCoverOptions(song).transform(blur)
+        val source = LyricsPreferences.backgroundSource(requireContext())
+        val artist = Artist(song.artistId, listOf(Album(song.albumId, listOf(song))))
+        val request = if (source == "artist" || source == "auto") {
+            Glide.with(this).load(RetroGlideExtension.getArtistModel(artist))
+                .artistImageOptions(artist).transform(blur).error(metadataRequest)
+        } else {
+            metadataRequest
+        }
+        request.thumbnail(lastRequest)
             .error(Glide.with(this).load(ColorDrawable(Color.DKGRAY)).fitCenter())
             .also {
                 lastRequest = it.clone()
-                it.crossfadeListener()
-                    .into(binding.colorBackground)
+                it.crossfadeListener().into(binding.colorBackground)
             }
     }
 
@@ -159,7 +168,7 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == NEW_BLUR_AMOUNT) {
+        if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source") {
             updateBlur()
         }
     }
