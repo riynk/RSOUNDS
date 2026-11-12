@@ -529,6 +529,7 @@
     <string name="try_retro_music_premium" translatable="false" />
     <string name="listing_files" translatable="false" />
 
+    <string name="pref_lyrics_sync_adjust">Adjust synchronization for this song</string>
     <string name="pref_lyrics_appearance">Lyrics appearance and translation</string>
     <string name="pref_lyrics_font_size">Lyrics font size</string>
     <string name="pref_lyrics_line_spacing">Lyrics line spacing</string>
