@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_lyrics_background_entries">
+        <item>Automatic (artist artwork first)</item>
+        <item>Metadata artwork</item>
+        <item>Artist artwork</item>
+    </string-array>
+    <string-array name="pref_lyrics_background_values">
+        <item>auto</item>
+        <item>metadata</item>
+        <item>artist</item>
+    </string-array>
+</resources>
