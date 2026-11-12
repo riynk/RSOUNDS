@@ -23,8 +23,8 @@ object LyricsPreferences {
 
     private fun prefs(context: Context) = PreferenceManager.getDefaultSharedPreferences(context)
 
-    fun fontScale(context: Context) = prefs(context).getFloat(FONT_SCALE, 1f).coerceIn(.75f, 1.5f)
-    fun lineSpacing(context: Context) = prefs(context).getFloat(LINE_SPACING, 1f).coerceIn(.8f, 1.8f)
+    fun fontScale(context: Context) = prefs(context).(getInt(FONT_SCALE, 100) / 100f).coerceIn(.75f, 1.5f)
+    fun lineSpacing(context: Context) = prefs(context).(getInt(LINE_SPACING, 100) / 100f).coerceIn(.8f, 1.8f)
     fun translationEnabled(context: Context) = prefs(context).getBoolean(TRANSLATION_ENABLED, false)
     fun translationLanguage(context: Context) = prefs(context).getString(TRANSLATION_LANGUAGE, "")?.takeIf { it.isNotBlank() } ?: java.util.Locale.getDefault().language
     fun backgroundSource(context: Context) = prefs(context).getString(BACKGROUND_SOURCE, "auto") ?: "auto"
