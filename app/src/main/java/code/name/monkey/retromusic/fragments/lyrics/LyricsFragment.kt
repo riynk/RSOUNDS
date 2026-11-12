@@ -20,6 +20,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.InputType
+import android.util.TypedValue
 import android.view.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -120,8 +121,10 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     }
 
     private fun setupLyricsView() {
+        val textColorValue = TypedValue()
+        requireContext().theme.resolveAttribute(android.R.attr.textColorPrimary, textColorValue, true)
         binding.lyricsView.apply {
-            setCurrentColor(accentColor())
+            setCurrentColor(textColorValue.data)
             setTimeTextColor(accentColor())
             setTimelineColor(accentColor())
             setTimelineTextColor(accentColor())
