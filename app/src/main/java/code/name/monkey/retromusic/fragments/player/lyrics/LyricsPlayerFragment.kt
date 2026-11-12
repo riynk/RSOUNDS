@@ -70,6 +70,8 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         _binding = FragmentLyricsPlayerBinding.bind(view)
         setUpSubFragments()
         setUpPlayerToolbar()
+        setUpBottomActions()
+        updateSongHeader()
         binding.playerToolbar.drawAboveSystemBars()
     }
 
@@ -80,9 +82,24 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         playerAlbumCoverFragment.setCallbacks(this)
     }
 
+    private fun setUpBottomActions() {
+        binding.sleepTimerButton.setOnClickListener {
+            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.action_sleep_timer))
+        }
+        binding.lyricsButton.setOnClickListener {
+            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.action_toggle_lyrics))
+        }
+        binding.favoriteButton.setOnClickListener {
+            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.action_toggle_favorite))
+        }
+        binding.queueButton.setOnClickListener {
+            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.now_playing))
+        }
+    }
+
     private fun setUpPlayerToolbar() {
         binding.playerToolbar.apply {
-            inflateMenu(R.menu.menu_player)
+            inflateMenu(R.menu.menu_lyrics_player)
             setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
             ToolbarContentTintHelper.colorizeToolbar(this, Color.WHITE, activity)
         }.setOnMenuItemClickListener(this)
