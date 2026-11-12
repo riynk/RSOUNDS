@@ -538,4 +538,9 @@
     <string name="pref_lyrics_translation_language">Translation language</string>
     <string name="pref_lyrics_translation_language_summary">Enter a language code, for example id, en, ja or ko. Leave empty to use the device language.</string>
     <string name="pref_lyrics_background_source">Lyrics background artwork</string>
+    <string name="now_playing_lyrics">Lyrics</string>
+    <string name="action_translate_lyrics">Translate lyrics</string>
+    <string name="lyrics_translation_loading">Translating lyrics…</string>
+    <string name="lyrics_translation_failed">Translation is unavailable. Check your connection and try again.</string>
+    <string name="lyrics_translation_no_lyrics">No lyrics are available to translate.</string>
 </resources>
