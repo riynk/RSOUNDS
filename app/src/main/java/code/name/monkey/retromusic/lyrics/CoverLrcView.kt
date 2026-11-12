@@ -79,6 +79,7 @@ class CoverLrcView @JvmOverloads constructor(
     private var mTextGravity // 歌词显示位置，靠左/居中/靠右
             = 0
     private var timeOffsetMs = 0L
+    private var timeScale = 1f
     private val hideTimelineRunnable = Runnable {
         if (hasLrc() && isShowTimeline) {
             isShowTimeline = false
@@ -154,7 +155,7 @@ class CoverLrcView @JvmOverloads constructor(
                     && mPlayDrawable!!.bounds.contains(e.x.toInt(), e.y.toInt())
                 ) {
                     val centerLine = centerLine
-                    val centerLineTime = mLrcEntryList[centerLine].time - timeOffsetMs
+                    val centerLineTime = ((mLrcEntryList[centerLine].time - timeOffsetMs) / timeScale).toLong()
                     // onPlayClick 消费了才更新 UI
                     if (mOnPlayClickListener != null && mOnPlayClickListener!!.onPlayClick(
                             centerLineTime
@@ -322,6 +323,7 @@ class CoverLrcView @JvmOverloads constructor(
     }
 
     fun setTimeOffsetMs(offsetMs: Long) { timeOffsetMs = offsetMs }
+    fun setTimeScale(scale: Float) { timeScale = scale.coerceIn(0.8f, 1.2f) }
 
     fun setLyricStyle(fontScale: Float, lineSpacing: Float) {
         val scale = fontScale.coerceIn(0.75f, 1.5f)
@@ -334,7 +336,7 @@ class CoverLrcView @JvmOverloads constructor(
     }
 
     fun updateTime(time: Long) {
-        val adjustedTime = time + timeOffsetMs
+        val adjustedTime = (time * timeScale).toLong() + timeOffsetMs
         runOnUi {
             if (!hasLrc()) {
                 return@runOnUi
