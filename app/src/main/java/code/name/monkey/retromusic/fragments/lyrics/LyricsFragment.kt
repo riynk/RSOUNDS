@@ -44,6 +44,14 @@ import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicProgressViewUpdateHelper
 import code.name.monkey.retromusic.lyrics.LrcView
 import code.name.monkey.retromusic.lyrics.LyricsPreferences
+import code.name.monkey.retromusic.glide.BlurTransformation
+import code.name.monkey.retromusic.glide.RetroGlideExtension
+import code.name.monkey.retromusic.glide.RetroGlideExtension.simpleSongCoverOptions
+import code.name.monkey.retromusic.glide.RetroGlideExtension.artistImageOptions
+import code.name.monkey.retromusic.glide.crossfadeListener
+import code.name.monkey.retromusic.model.Album
+import code.name.monkey.retromusic.model.Artist
+import com.bumptech.glide.Glide
 import code.name.monkey.retromusic.model.AudioTagInfo
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.FileUtils
@@ -117,11 +125,27 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         updateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
         updateTitleSong()
         setupLyricsView()
+        updateLyricsBackground()
         loadLyrics()
 
         setupWakelock()
         setupViews()
         setupToolbar()
+    }
+
+    private fun updateLyricsBackground() {
+        val current = MusicPlayerRemote.currentSong
+        val blur = BlurTransformation.Builder(requireContext())
+            .blurRadius(PreferenceUtil.blurAmount.toFloat()).build()
+        val metadata = Glide.with(this).load(RetroGlideExtension.getSongModel(current))
+            .simpleSongCoverOptions(current).transform(blur)
+        val source = LyricsPreferences.backgroundSource(requireContext())
+        val artist = Artist(current.artistId, listOf(Album(current.albumId, listOf(current))))
+        val request = if (source == "artist" || source == "auto") {
+            Glide.with(this).load(RetroGlideExtension.getArtistModel(artist))
+                .artistImageOptions(artist).transform(blur).error(metadata)
+        } else metadata
+        request.into(binding.lyricsBackground)
     }
 
     private fun setupLyricsView() {
@@ -183,6 +207,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         translationJob?.cancel()
         translationSongPath = null
         updateTitleSong()
+        updateLyricsBackground()
         binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
         loadLyrics()
     }
@@ -234,14 +259,13 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         materialDialog().show {
             title(res = R.string.pref_lyrics_sync_adjust)
             input(
-                hint = "Milliseconds (negative = earlier, positive = later)",
+                hintRes = R.string.pref_lyrics_sync_adjust,
                 prefill = currentOffset.toString(),
                 inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
             ) { _, value ->
                 val offset = value.toString().toLongOrNull() ?: return@input
                 LyricsPreferences.setOffset(requireContext(), song, offset)
                 binding.lyricsView.setTimeOffsetMs(offset)
-                binding.lyricsView.updateTime(MusicPlayerRemote.position.toLong())
             }
             positiveButton(res = R.string.save)
             negativeButton(res = android.R.string.cancel)
