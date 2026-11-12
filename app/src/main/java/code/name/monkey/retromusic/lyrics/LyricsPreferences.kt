@@ -19,6 +19,7 @@ object LyricsPreferences {
     private const val TRANSLATION_LANGUAGE = "lyrics_translation_language"
     private const val BACKGROUND_SOURCE = "lyrics_background_source"
     private const val OFFSET_PREFIX = "lyrics_offset_"
+    private const val SCALE_PREFIX = "lyrics_time_scale_"
     private const val CACHE_PREFIX = "lyrics_translation_cache_"
 
     private fun prefs(context: Context) = PreferenceManager.getDefaultSharedPreferences(context)
@@ -37,6 +38,12 @@ object LyricsPreferences {
     fun offset(context: Context, song: Song) = prefs(context).getLong(songKey(song), 0L)
     fun setOffset(context: Context, song: Song, offsetMs: Long) {
         prefs(context).edit { putLong(songKey(song), offsetMs.coerceIn(-30000L, 30000L)) }
+    }
+
+    private fun scaleKey(song: Song) = SCALE_PREFIX + songKey(song).removePrefix(OFFSET_PREFIX)
+    fun timeScale(context: Context, song: Song) = prefs(context).getFloat(scaleKey(song), 1f).coerceIn(0.8f, 1.2f)
+    fun setTimeScale(context: Context, song: Song, scale: Float) {
+        prefs(context).edit { putFloat(scaleKey(song), scale.coerceIn(0.8f, 1.2f)) }
     }
 
     private fun cacheKey(text: String, target: String) =
