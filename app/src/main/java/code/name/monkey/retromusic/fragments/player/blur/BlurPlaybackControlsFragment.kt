@@ -117,8 +117,11 @@ class BlurPlaybackControlsFragment :
         if (PreferenceUtil.nowPlayingScreen == Lyrics) {
             binding.title.hide()
             binding.text.hide()
-            binding.songInfo.hide()
-        } else if (PreferenceUtil.isSongInfo) {
+        } else {
+            binding.title.show()
+            binding.text.show()
+        }
+        if (PreferenceUtil.isSongInfo) {
             binding.songInfo.show()
             binding.songInfo.text = getSongInfo(song)
         } else {
