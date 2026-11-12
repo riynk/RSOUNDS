@@ -58,10 +58,10 @@ object LyricsPreferences {
     }
 
     /** Uses public LibreTranslate-compatible mirrors; callers must invoke off the main thread. */
-    suspend fun translate(context: Context, text: String, source: String = "auto"): String? =
+    suspend fun translate(context: Context, text: String, source: String = "auto", force: Boolean = false): String? =
         withContext(Dispatchers.IO) {
             val target = translationLanguage(context)
-            if (!translationEnabled(context) || text.isBlank()) return@withContext null
+            if ((!translationEnabled(context) && !force) || text.isBlank()) return@withContext null
             cachedTranslation(context, text, target)?.let { return@withContext it }
 
             // Public mirrors can be temporarily unavailable or rate-limited. Try another
