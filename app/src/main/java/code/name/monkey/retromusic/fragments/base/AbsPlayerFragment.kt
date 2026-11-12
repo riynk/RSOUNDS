@@ -62,6 +62,8 @@ import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.LibraryViewModel
 import code.name.monkey.retromusic.fragments.ReloadType
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
+import code.name.monkey.retromusic.lyrics.LyricsTranslationDialog
+import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.interfaces.IPaletteColorHolder
 import code.name.monkey.retromusic.model.Song
@@ -94,6 +96,14 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
     ): Boolean {
         val song = MusicPlayerRemote.currentSong
         when (item.itemId) {
+            R.id.action_translate_lyrics -> {
+                val synced = LyricUtil.getStringFromLrc(LyricUtil.getSyncedLyricsFile(song))
+                val embedded = if (synced.isBlank()) LyricUtil.getEmbeddedSyncedLyrics(song.data).orEmpty() else synced
+                val lines = embedded.replace(Regex("\\\\[[^]]*]"), "").lineSequence().toList()
+                LyricsTranslationDialog.show(this, lines)
+                return true
+            }
+
             R.id.action_playback_speed -> {
                 PlaybackSpeedDialog.newInstance().show(childFragmentManager, "PLAYBACK_SETTINGS")
                 return true
