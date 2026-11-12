@@ -99,7 +99,7 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
             R.id.action_translate_lyrics -> {
                 val synced = LyricUtil.getStringFromLrc(LyricUtil.getSyncedLyricsFile(song))
                 val embedded = if (synced.isBlank()) LyricUtil.getEmbeddedSyncedLyrics(song.data).orEmpty() else synced
-                val lines = embedded.replace(Regex("\\\\[[^]]*]"), "").lineSequence().toList()
+                val lines = embedded.lineSequence().map { line -> if (']' in line) line.substringAfter(']') else line }.toList()
                 LyricsTranslationDialog.show(this, lines)
                 return true
             }
