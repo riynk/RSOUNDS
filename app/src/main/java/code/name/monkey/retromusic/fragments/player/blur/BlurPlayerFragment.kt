@@ -40,6 +40,8 @@ import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.model.Album
 import code.name.monkey.retromusic.model.Artist
+import code.name.monkey.retromusic.util.PreferenceUtil
+import code.name.monkey.retromusic.util.CoverLyricsType
 import code.name.monkey.retromusic.util.PreferenceUtil.blurAmount
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import com.bumptech.glide.Glide
@@ -123,7 +125,7 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
         val blur = BlurTransformation.Builder(requireContext()).blurRadius(blurAmount.toFloat()).build()
         val metadataRequest = Glide.with(this).load(RetroGlideExtension.getSongModel(song))
             .simpleSongCoverOptions(song).transform(blur)
-        val source = LyricsPreferences.backgroundSource(requireContext())
+        val source = if (PreferenceUtil.lyricsType == CoverLyricsType.OVER_COVER) LyricsPreferences.backgroundSource(requireContext()) else "metadata"
         val artist = Artist(song.artistId, listOf(Album(song.albumId, listOf(song))))
         val request = if (source == "artist" || source == "auto") {
             Glide.with(this).load(RetroGlideExtension.getArtistModel(artist))
