@@ -97,14 +97,22 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
         val song = MusicPlayerRemote.currentSong
         when (item.itemId) {
             R.id.action_translate_lyrics -> {
-                val synced = LyricUtil.getStringFromLrc(LyricUtil.getSyncedLyricsFile(song))
-                val embedded = if (synced.isBlank()) LyricUtil.getEmbeddedSyncedLyrics(song.data).orEmpty() else synced
-                val lines = embedded.lineSequence().map { sourceLine ->
-                    var line = sourceLine.trim()
-                    while (line.startsWith("[") && "]" in line) line = line.substringAfter(']')
-                    line.trim()
-                }.toList()
-                LyricsTranslationDialog.show(this, lines)
+                lifecycleScope.launch(IO) {
+                    val synced = LyricUtil.getStringFromLrc(LyricUtil.getSyncedLyricsFile(song))
+                    val embedded = if (synced.isBlank()) {
+                        LyricUtil.getEmbeddedSyncedLyrics(song.data).orEmpty()
+                    } else {
+                        synced
+                    }
+                    val lines = embedded.lineSequence().map { sourceLine ->
+                        var line = sourceLine.trim()
+                        while (line.startsWith("[") && "]" in line) line = line.substringAfter(']')
+                        line.trim()
+                    }.toList()
+                    withContext(Main) {
+                        if (isAdded) LyricsTranslationDialog.show(this@AbsPlayerFragment, lines)
+                    }
+                }
                 return true
             }
 
