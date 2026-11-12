@@ -160,6 +160,7 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(requireContext())
             .registerOnSharedPreferenceChangeListener(this)
+        updateBlur()
     }
 
     override fun onDestroyView() {
@@ -170,7 +171,7 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source") {
+        if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source" || key == "lyrics_type") {
             updateBlur()
         }
     }
