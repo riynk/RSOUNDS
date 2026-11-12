@@ -215,6 +215,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     override fun onServiceConnected() {
         super.onServiceConnected()
         updateTitleSong()
+        updateLyricsBackground()
         binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
         loadLyrics()
     }
