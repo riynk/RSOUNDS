@@ -1,6 +1,7 @@
 package code.name.monkey.retromusic.lyrics
 
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import code.name.monkey.retromusic.model.Song
@@ -56,33 +57,52 @@ object LyricsPreferences {
         prefs(context).edit { putString(cacheKey(text, target), translated) }
     }
 
-    /** Uses LibreTranslate-compatible API; callers must invoke off the main thread. */
+    /** Uses public LibreTranslate-compatible mirrors; callers must invoke off the main thread. */
     suspend fun translate(context: Context, text: String, source: String = "auto"): String? =
         withContext(Dispatchers.IO) {
             val target = translationLanguage(context)
             if (!translationEnabled(context) || text.isBlank()) return@withContext null
             cachedTranslation(context, text, target)?.let { return@withContext it }
-            var connection: HttpURLConnection? = null
-            try {
-                connection = (URL("https://libretranslate.de/translate").openConnection() as HttpURLConnection).apply {
-                    requestMethod = "POST"
-                    connectTimeout = 8000
-                    readTimeout = 12000
-                    doOutput = true
-                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
+
+            // Public mirrors can be temporarily unavailable or rate-limited. Try another
+            // documented mirror instead of silently giving up after the first failure.
+            val endpoints = listOf(
+                "https://libretranslate.de/translate",
+                "https://translate.argosopentech.com/translate",
+                "https://trans.zillyhuhn.com/translate"
+            )
+            val body = JSONObject().put("q", text).put("source", source)
+                .put("target", target).put("format", "text").toString()
+
+            for (endpoint in endpoints) {
+                var connection: HttpURLConnection? = null
+                try {
+                    connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
+                        requestMethod = "POST"
+                        connectTimeout = 8000
+                        readTimeout = 12000
+                        doOutput = true
+                        setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                        setRequestProperty("Accept", "application/json")
+                    }
+                    connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    if (connection.responseCode !in 200..299) {
+                        Log.w("LyricsTranslation", "Translation endpoint failed: $endpoint (${connection.responseCode})")
+                        continue
+                    }
+                    val result = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+                        .optString("translatedText").takeIf { it.isNotBlank() }
+                    if (result != null) {
+                        saveTranslation(context, text, target, result)
+                        return@withContext result
+                    }
+                    Log.w("LyricsTranslation", "Empty translation response from $endpoint")
+                } catch (error: Exception) {
+                    Log.w("LyricsTranslation", "Translation request failed: $endpoint", error)
+                } finally {
+                    connection?.disconnect()
                 }
-                val body = JSONObject().put("q", text).put("source", source)
-                    .put("target", target).put("format", "text").toString()
-                connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-                if (connection.responseCode !in 200..299) return@withContext null
-                val result = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
-                    .optString("translatedText").takeIf { it.isNotBlank() }
-                if (result != null) saveTranslation(context, text, target, result)
-                result
-            } catch (_: Exception) {
-                null
-            } finally {
-                connection?.disconnect()
             }
+            null
         }
 }
