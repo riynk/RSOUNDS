@@ -2,6 +2,7 @@ package code.name.monkey.retromusic.fragments.player
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -11,7 +12,6 @@ import androidx.preference.PreferenceManager
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.SHOW_LYRICS
 import code.name.monkey.retromusic.databinding.FragmentCoverLyricsBinding
-import code.name.monkey.retromusic.extensions.dipToPix
 import code.name.monkey.retromusic.fragments.base.AbsMusicServiceFragment
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
 import code.name.monkey.retromusic.fragments.base.goToLyrics
@@ -53,14 +53,16 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     }
 
     fun setColors(color: MediaNotificationProcessor) {
+        val value = TypedValue()
+        requireContext().theme.resolveAttribute(android.R.attr.textColorPrimary, value, true)
+        val defaultTextColor = value.data
         binding.run {
             playerLyrics.background = null
-            playerLyricsLine1.setTextColor(color.primaryTextColor)
-            playerLyricsLine1.setShadowLayer(dipToPix(10f), 0f, 0f, color.backgroundColor)
-            playerLyricsLine2.setTextColor(color.primaryTextColor)
-            playerLyricsLine2.setShadowLayer(dipToPix(10f), 0f, 0f, color.backgroundColor)
+            playerLyricsLine1.setTextColor(defaultTextColor)
+            playerLyricsLine1.setShadowLayer(0f, 0f, 0f, 0)
+            playerLyricsLine2.setTextColor(defaultTextColor)
+            playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
         }
-
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
