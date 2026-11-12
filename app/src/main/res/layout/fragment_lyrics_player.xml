@@ -110,10 +110,57 @@
         android:name="code.name.monkey.retromusic.fragments.player.blur.BlurPlaybackControlsFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomActionsRow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/playerAlbumCoverFragment"
         tools:layout="@layout/fragment_blur_player_playback_controls" />
+
+    <LinearLayout
+        android:id="@+id/bottomActionsRow"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/sleepTimerButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/action_sleep_timer"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_sleep_timer" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/lyricsButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/lyrics"
+            android:padding="12dp"
+            app:srcCompat="@drawable/sld_lyrics" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/favoriteButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/favorites"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_favorite" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/queueButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/now_playing_queue"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_queue_music" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
