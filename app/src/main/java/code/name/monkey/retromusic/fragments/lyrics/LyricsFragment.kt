@@ -99,6 +99,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     private lateinit var updateHelper: MusicProgressViewUpdateHelper
     private var translationJob: Job? = null
     private var translationSongPath: String? = null
+    private var originalNormalLyrics: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -265,7 +266,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
                 val lines = if (lyricsType == LyricsType.SYNCED_LYRICS) {
                     binding.lyricsView.lyricTexts
                 } else {
-                    binding.normalLyrics.text.toString().lines()
+                    originalNormalLyrics.lines()
                 }
                 LyricsTranslationDialog.show(this, lines)
             }
@@ -429,6 +430,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         }
         binding.normalLyrics.isVisible = !lyrics.isNullOrEmpty()
         binding.noLyricsFound.isVisible = lyrics.isNullOrEmpty()
+        originalNormalLyrics = lyrics.orEmpty()
         binding.normalLyrics.text = lyrics
         val scale = LyricsPreferences.fontScale(requireContext())
         binding.normalLyrics.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * scale)
