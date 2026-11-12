@@ -56,6 +56,7 @@ import code.name.monkey.retromusic.model.AudioTagInfo
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.FileUtils
 import code.name.monkey.retromusic.util.LyricUtil
+import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.UriUtil
 import com.afollestad.materialdialogs.input.input
 import kotlinx.coroutines.launch
@@ -393,6 +394,22 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         binding.normalLyrics.isVisible = !lyrics.isNullOrEmpty()
         binding.noLyricsFound.isVisible = lyrics.isNullOrEmpty()
         binding.normalLyrics.text = lyrics
+        val scale = LyricsPreferences.fontScale(requireContext())
+        binding.normalLyrics.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * scale)
+        binding.normalLyrics.setLineSpacing(0f, LyricsPreferences.lineSpacing(requireContext()))
+        if (LyricsPreferences.translationEnabled(requireContext()) && !lyrics.isNullOrBlank()) {
+            val currentPath = song.data
+            viewLifecycleOwner.lifecycleScope.launch {
+                val translatedLines = lyrics.lines().map { line ->
+                    if (line.isBlank()) "" else LyricsPreferences.translate(requireContext(), line).orEmpty()
+                }
+                if (currentPath == song.data) {
+                    binding.normalLyrics.text = lyrics.lines().mapIndexed { index, line ->
+                        if (translatedLines[index].isBlank()) line else line + "\n" + translatedLines[index]
+                    }.joinToString("\n\n")
+                }
+            }
+        }
     }
 
     /**
