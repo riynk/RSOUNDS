@@ -272,6 +272,11 @@ public class LrcView extends View {
         mScroller = new Scroller(getContext());
     }
 
+    public void setNormalColor(int normalColor) {
+        mNormalTextColor = normalColor;
+        postInvalidate();
+    }
+
     public void setCurrentColor(int currentColor) {
         mCurrentTextColor = currentColor;
         postInvalidate();
