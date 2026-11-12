@@ -174,7 +174,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
 
         val oldLine = lyricsLine2.text.toString()
         val song = MusicPlayerRemote.currentSong
-        val adjustedProgress = (progress + LyricsPreferences.offset(requireContext(), song)).coerceAtLeast(0L).toInt()
+        val adjustedProgress = ((progress * LyricsPreferences.timeScale(requireContext(), song)).toLong() + LyricsPreferences.offset(requireContext(), song)).coerceAtLeast(0L).toInt()
         val line = synchronizedLyrics.getLine(adjustedProgress)
 
         if (oldLine != line || oldLine.isEmpty()) {
