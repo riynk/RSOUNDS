@@ -482,8 +482,8 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
             "lyrics_translation_enabled", "lyrics_translation_language" -> {
                 translationJob?.cancel()
                 translationSongPath = null
+                binding.lyricsView.clearTranslations()
                 if (!LyricsPreferences.translationEnabled(requireContext())) {
-                    binding.lyricsView.clearTranslations()
                     if (lyricsType == LyricsType.NORMAL_LYRICS) loadNormalLyrics()
                 } else if (lyricsType == LyricsType.NORMAL_LYRICS) {
                     loadNormalLyrics()
