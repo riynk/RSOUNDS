@@ -483,6 +483,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
                 translationSongPath = null
                 if (!LyricsPreferences.translationEnabled(requireContext())) {
                     binding.lyricsView.lyricTexts.indices.forEach { binding.lyricsView.setTranslation(it, "") }
+                    if (lyricsType == LyricsType.NORMAL_LYRICS) loadNormalLyrics()
                 } else if (lyricsType == LyricsType.NORMAL_LYRICS) {
                     loadNormalLyrics()
                 } else {
