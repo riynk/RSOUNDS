@@ -6,6 +6,10 @@
         android:title="@string/pref_lyrics_sync_adjust"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_sync_rate"
+        android:title="@string/pref_lyrics_sync_rate"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search"
         android:title="@string/action_search"
