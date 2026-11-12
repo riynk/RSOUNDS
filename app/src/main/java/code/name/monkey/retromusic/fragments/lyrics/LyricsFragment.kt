@@ -155,6 +155,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         binding.lyricsView.apply {
             setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
             setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
+            setNormalColor(textColorValue.data)
             setCurrentColor(textColorValue.data)
             setTimeTextColor(accentColor())
             setTimelineColor(accentColor())
