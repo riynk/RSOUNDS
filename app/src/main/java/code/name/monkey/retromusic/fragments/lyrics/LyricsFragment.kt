@@ -155,6 +155,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         binding.lyricsView.apply {
             setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
             setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
+            setTimeScale(LyricsPreferences.timeScale(requireContext(), song))
             setNormalColor(textColorValue.data)
             setCurrentColor(textColorValue.data)
             setTimeTextColor(accentColor())
@@ -211,6 +212,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         updateTitleSong()
         updateLyricsBackground()
         binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
+        binding.lyricsView.setTimeScale(LyricsPreferences.timeScale(requireContext(), song))
         loadLyrics()
     }
 
