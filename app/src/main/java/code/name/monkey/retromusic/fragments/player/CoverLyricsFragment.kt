@@ -19,6 +19,7 @@ import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicProgressViewUpdateHelper
 import code.name.monkey.retromusic.model.lyrics.AbsSynchronizedLyrics
 import code.name.monkey.retromusic.model.lyrics.Lyrics
+import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
@@ -44,6 +45,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentCoverLyricsBinding.bind(view)
         progressViewUpdateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
+        applyLyricStyle()
         if (PreferenceUtil.showLyrics) {
             progressViewUpdateHelper?.start()
         }
@@ -66,6 +68,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
+        if (key == "lyrics_font_scale" || key == "lyrics_line_spacing") applyLyricStyle()
         if (key == SHOW_LYRICS) {
             if (sharedPreferences.getBoolean(key, false) == true) {
                 progressViewUpdateHelper?.start()
@@ -113,6 +116,15 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         }
     }
 
+    private fun applyLyricStyle() {
+        val scale = LyricsPreferences.fontScale(requireContext())
+        val spacing = LyricsPreferences.lineSpacing(requireContext())
+        lyricsLine1.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24f * scale)
+        lyricsLine2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24f * scale)
+        lyricsLine1.setLineSpacing(0f, spacing)
+        lyricsLine2.setLineSpacing(0f, spacing)
+    }
+
     override fun onUpdateProgressViews(progress: Int, total: Int) {
         if (_binding == null) return
 
@@ -128,7 +140,9 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         lyricsLayout.alpha = 1f
 
         val oldLine = lyricsLine2.text.toString()
-        val line = synchronizedLyrics.getLine(progress)
+        val song = MusicPlayerRemote.currentSong
+        val adjustedProgress = (progress + LyricsPreferences.offset(requireContext(), song)).coerceAtLeast(0L).toInt()
+        val line = synchronizedLyrics.getLine(adjustedProgress)
 
         if (oldLine != line || oldLine.isEmpty()) {
             lyricsLine1.text = oldLine
