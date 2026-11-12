@@ -51,6 +51,52 @@
 
     <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory
         android:layout="@layout/preference_category_title"
+        android:title="@string/pref_lyrics_appearance">
+
+        <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESeekBarPreference
+            android:defaultValue="100"
+            android:key="lyrics_font_scale"
+            android:layout="@layout/list_item_view_seekbar"
+            android:max="150"
+            android:min="75"
+            android:title="@string/pref_lyrics_font_size"
+            app:ateKey_pref_unit="%"
+            app:showSeekBarValue="true" />
+
+        <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESeekBarPreference
+            android:defaultValue="100"
+            android:key="lyrics_line_spacing"
+            android:layout="@layout/list_item_view_seekbar"
+            android:max="180"
+            android:min="80"
+            android:title="@string/pref_lyrics_line_spacing"
+            app:ateKey_pref_unit="%"
+            app:showSeekBarValue="true" />
+
+        <code.name.monkey.appthemehelper.common.prefs.supportv7.ATESwitchPreference
+            android:defaultValue="false"
+            android:key="lyrics_translation_enabled"
+            android:layout="@layout/list_item_view_switch"
+            android:title="@string/pref_lyrics_translation" />
+
+        <androidx.preference.EditTextPreference
+            android:key="lyrics_translation_language"
+            android:layout="@layout/list_item_view"
+            android:dialogTitle="@string/pref_lyrics_translation_language"
+            android:title="@string/pref_lyrics_translation_language"
+            android:summary="@string/pref_lyrics_translation_language_summary" />
+
+        <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEListPreference
+            android:defaultValue="auto"
+            android:entries="@array/pref_lyrics_background_entries"
+            android:entryValues="@array/pref_lyrics_background_values"
+            android:key="lyrics_background_source"
+            android:layout="@layout/list_item_view"
+            android:title="@string/pref_lyrics_background_source" />
+    </code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory>
+
+    <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory
+        android:layout="@layout/preference_category_title"
         android:title="@string/pref_header_album">
 
         <code.name.monkey.retromusic.preferences.AlbumCoverStylePreference
