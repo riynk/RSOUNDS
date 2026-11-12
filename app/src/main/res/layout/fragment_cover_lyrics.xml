@@ -40,6 +40,18 @@
         tools:visibility="visible" />
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/player_lyrics_translation_previous"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:translationY="-34dp"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
+        android:visibility="gone" />
+
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/player_lyrics_line2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
