@@ -111,12 +111,12 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         val requestedSong = MusicPlayerRemote.currentSong
         lifecycleScope.launch(Dispatchers.IO) {
             val parsed = try {
-                val lrcFile: File? = LyricUtil.getSyncedLyricsFile(song)
+                val lrcFile: File? = LyricUtil.getSyncedLyricsFile(requestedSong)
                 val data: String = LyricUtil.getStringFromLrc(lrcFile)
-                Lyrics.parse(song,
+                Lyrics.parse(requestedSong,
                     data.ifEmpty {
                         // Get Embedded Lyrics
-                        LyricUtil.getEmbeddedSyncedLyrics(song.data)
+                        LyricUtil.getEmbeddedSyncedLyrics(requestedSong.data)
                     }
                 )
             } catch (err: FileNotFoundException) {
