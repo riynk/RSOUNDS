@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Looper;
@@ -255,6 +256,7 @@ public class LrcView extends View {
         mTimeTextWidth = (int) getResources().getDimension(R.dimen.lrc_time_width);
 
         mLrcPaint.setAntiAlias(true);
+        mLrcPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
         mLrcPaint.setTextSize(mCurrentTextSize);
         mLrcPaint.setTextAlign(Paint.Align.LEFT);
         mTimePaint.setAntiAlias(true);
