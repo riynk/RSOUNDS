@@ -78,6 +78,7 @@ class CoverLrcView @JvmOverloads constructor(
     private var isFling = false
     private var mTextGravity // 歌词显示位置，靠左/居中/靠右
             = 0
+    private var timeOffsetMs = 0L
     private val hideTimelineRunnable = Runnable {
         if (hasLrc() && isShowTimeline) {
             isShowTimeline = false
@@ -320,12 +321,25 @@ class CoverLrcView @JvmOverloads constructor(
         return mLrcEntryList.isNotEmpty()
     }
 
+    fun setTimeOffsetMs(offsetMs: Long) { timeOffsetMs = offsetMs }
+
+    fun setLyricStyle(fontScale: Float, lineSpacing: Float) {
+        val scale = fontScale.coerceIn(0.75f, 1.5f)
+        mCurrentTextSize = resources.getDimension(R.dimen.lrc_current_text_size) * scale
+        mNormalTextSize = resources.getDimension(R.dimen.lrc_text_size) * scale
+        mDividerHeight = resources.getDimension(R.dimen.lrc_divider_height) * lineSpacing.coerceIn(0.8f, 1.8f)
+        mLrcPaint.textSize = mCurrentTextSize
+        initEntryList()
+        invalidate()
+    }
+
     fun updateTime(time: Long) {
+        val adjustedTime = time + timeOffsetMs
         runOnUi {
             if (!hasLrc()) {
                 return@runOnUi
             }
-            val line = findShowLine(time + 300L)
+            val line = findShowLine(adjustedTime + 300L)
             if (line != mCurrentLine) {
                 mCurrentLine = line
                 if (!isShowTimeline) {
