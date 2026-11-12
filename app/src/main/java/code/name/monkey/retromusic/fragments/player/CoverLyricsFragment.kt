@@ -24,6 +24,8 @@ import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import org.jaudiotagger.audio.exceptions.CannotReadException
 import java.io.File
@@ -41,6 +43,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     private val lyricsTranslation: TextView get() = binding.playerLyricsTranslation
 
     private var lyrics: Lyrics? = null
+    private var translationJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -100,9 +103,14 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
 
     private fun updateLyrics() {
         lyrics = null
+        translationJob?.cancel()
+        lyricsLine1.text = null
+        lyricsLine2.text = null
+        lyricsTranslation.text = null
+        lyricsTranslation.isVisible = false
+        val requestedSong = MusicPlayerRemote.currentSong
         lifecycleScope.launch(Dispatchers.IO) {
-            val song = MusicPlayerRemote.currentSong
-            lyrics = try {
+            val parsed = try {
                 val lrcFile: File? = LyricUtil.getSyncedLyricsFile(song)
                 val data: String = LyricUtil.getStringFromLrc(lrcFile)
                 Lyrics.parse(song,
@@ -116,6 +124,9 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             } catch (e: CannotReadException) {
                 null
             }
+            withContext(Dispatchers.Main) {
+                if (MusicPlayerRemote.currentSong.data == requestedSong.data) lyrics = parsed
+            }
         }
     }
 
@@ -126,9 +137,10 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             return
         }
         val songPath = MusicPlayerRemote.currentSong.data
-        lifecycleScope.launch {
+        translationJob?.cancel()
+        translationJob = lifecycleScope.launch {
             val translated = LyricsPreferences.translate(requireContext(), line)
-            if (songPath == MusicPlayerRemote.currentSong.data && !translated.isNullOrBlank()) {
+            if (songPath == MusicPlayerRemote.currentSong.data && lyricsLine2.text.toString() == line && !translated.isNullOrBlank()) {
                 lyricsTranslation.text = translated
                 lyricsTranslation.isVisible = true
             }
@@ -203,6 +215,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
                 lyricsLayout.isVisible = false
                 lyricsLine1.text = null
                 lyricsLine2.text = null
+                lyricsTranslation.text = null
+                lyricsTranslation.isVisible = false
             }
     }
 
