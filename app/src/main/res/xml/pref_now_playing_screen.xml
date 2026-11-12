@@ -47,7 +47,7 @@
         android:key="swipe_anywhere_now_playing"
         android:layout="@layout/list_item_view_switch"
         android:summary="@string/pref_summary_swipe_anywhere_now_playing"
-        android:title="@string/pref_title_swipe_anywhere_now_playing" app:icon="@drawable/ic_swipe" />
+        android:title="@string/pref_title_swipe_anywhere_now_playing" app:icon="@drawable/ic_redo" />
 
     <code.name.monkey.appthemehelper.common.prefs.supportv7.ATEPreferenceCategory
         android:layout="@layout/preference_category_title"
