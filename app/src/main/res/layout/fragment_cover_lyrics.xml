@@ -37,6 +37,7 @@
         android:shadowColor="@color/md_black_1000"
         android:shadowRadius="10"
         android:textAppearance="@style/TextViewHeadline5"
-        android:textColor="@color/md_white_1000"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
         tools:text="@tools:sample/full_names[5]" />
 </FrameLayout>
