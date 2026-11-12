@@ -395,6 +395,23 @@ public class LrcView extends View {
         return texts;
     }
 
+    public void setTranslations(List<String> translations) {
+        int count = Math.min(mLrcEntryList.size(), translations.size());
+        for (int i = 0; i < count; i++) mLrcEntryList.get(i).setSecondText(translations.get(i));
+        float previousOffset = mOffset;
+        initEntryList();
+        mOffset = previousOffset;
+        postInvalidate();
+    }
+
+    public void clearTranslations() {
+        for (LrcEntry entry : mLrcEntryList) entry.setSecondText(null);
+        float previousOffset = mOffset;
+        initEntryList();
+        mOffset = previousOffset;
+        postInvalidate();
+    }
+
     public void setTranslation(int index, String translation) {
         if (index < 0 || index >= mLrcEntryList.size()) return;
         mLrcEntryList.get(index).setSecondText(translation);
