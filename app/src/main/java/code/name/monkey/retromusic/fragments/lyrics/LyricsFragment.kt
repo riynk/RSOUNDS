@@ -16,6 +16,7 @@ package code.name.monkey.retromusic.fragments.lyrics
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -27,6 +28,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.navigation.fragment.findNavController
 import androidx.transition.Fade
 import code.name.monkey.appthemehelper.common.ATHToolbarActivity
@@ -69,7 +71,7 @@ import java.util.*
 import kotlin.collections.set
 
 class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
-    MusicProgressViewUpdateHelper.Callback {
+    MusicProgressViewUpdateHelper.Callback, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var _binding: FragmentLyricsBinding? = null
     private val binding get() = _binding!!
@@ -470,11 +472,33 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     override fun onResume() {
         super.onResume()
         updateHelper.start()
+        PreferenceManager.getDefaultSharedPreferences(requireContext()).registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            "lyrics_translation_enabled", "lyrics_translation_language" -> {
+                translationJob?.cancel()
+                translationSongPath = null
+                if (!LyricsPreferences.translationEnabled(requireContext())) {
+                    binding.lyricsView.lyricTexts.indices.forEach { binding.lyricsView.setTranslation(it, "") }
+                } else {
+                    startLyricTranslations()
+                }
+            }
+            "lyrics_font_scale", "lyrics_line_spacing" -> {
+                binding.lyricsView.setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
+                binding.normalLyrics.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * LyricsPreferences.fontScale(requireContext()))
+                binding.normalLyrics.setLineSpacing(0f, LyricsPreferences.lineSpacing(requireContext()))
+            }
+            "lyrics_background_source" -> updateLyricsBackground()
+        }
     }
 
     override fun onPause() {
         super.onPause()
         updateHelper.stop()
+        PreferenceManager.getDefaultSharedPreferences(requireContext()).unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onDestroyView() {
