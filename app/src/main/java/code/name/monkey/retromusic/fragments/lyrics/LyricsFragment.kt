@@ -221,10 +221,31 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     }
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_search) {
-            openUrl(googleSearchLrcUrl)
+        when (item.itemId) {
+            R.id.action_search -> openUrl(googleSearchLrcUrl)
+            R.id.action_sync -> adjustLyricsSync()
+            else -> return false
         }
-        return false
+        return true
+    }
+
+    private fun adjustLyricsSync() {
+        val currentOffset = LyricsPreferences.offset(requireContext(), song)
+        materialDialog().show {
+            title(res = R.string.pref_lyrics_sync_adjust)
+            input(
+                hint = "Milliseconds (negative = earlier, positive = later)",
+                prefill = currentOffset.toString(),
+                inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
+            ) { _, value ->
+                val offset = value.toString().toLongOrNull() ?: return@input
+                LyricsPreferences.setOffset(requireContext(), song, offset)
+                binding.lyricsView.setTimeOffsetMs(offset)
+                binding.lyricsView.updateTime(MusicPlayerRemote.position.toLong())
+            }
+            positiveButton(res = R.string.save)
+            negativeButton(res = android.R.string.cancel)
+        }
     }
 
     @SuppressLint("CheckResult")
