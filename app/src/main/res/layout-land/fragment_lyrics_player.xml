@@ -141,6 +141,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/action_sleep_timer"
                 android:padding="10dp"
+            android:tint="?android:attr/textColorPrimary"
                 app:srcCompat="@drawable/ic_sleep_timer" />
 
             <androidx.appcompat.widget.AppCompatImageButton
@@ -150,6 +151,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/lyrics"
                 android:padding="10dp"
+            android:tint="?android:attr/textColorPrimary"
                 app:srcCompat="@drawable/sld_lyrics" />
 
             <androidx.appcompat.widget.AppCompatImageButton
@@ -159,6 +161,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/favorites"
                 android:padding="10dp"
+            android:tint="?android:attr/textColorPrimary"
                 app:srcCompat="@drawable/ic_favorite" />
 
             <androidx.appcompat.widget.AppCompatImageButton
@@ -168,6 +171,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/now_playing_queue"
                 android:padding="10dp"
+            android:tint="?android:attr/textColorPrimary"
                 app:srcCompat="@drawable/ic_queue_music" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
