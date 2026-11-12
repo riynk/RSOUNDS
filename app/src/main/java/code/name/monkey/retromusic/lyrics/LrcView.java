@@ -418,14 +418,14 @@ public class LrcView extends View {
     }
 
     public void updateTime(long time) {
-        time = (long) (time * mTimeScale) + mTimeOffsetMs;
+        final long adjustedTime = (long) (time * mTimeScale) + mTimeOffsetMs;
         runOnUi(
                 () -> {
                     if (!hasLrc()) {
                         return;
                     }
 
-                    int line = findShowLine(time);
+                    int line = findShowLine(adjustedTime);
                     if (line != mCurrentLine) {
                         mCurrentLine = line;
                         if (!isShowTimeline) {
