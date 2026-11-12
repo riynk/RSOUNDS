@@ -90,6 +90,7 @@
     <string name="bluetooth_summary">Aplikasi butuh izin ke perangkat terdekat untuk memeriksa perangkat bluetooth</string>
     <string name="bluetooth_title">Perangkat terdekat</string>
     <string name="blur">Keburaman</string>
+    <string name="now_playing_default">Default</string>
     <string name="blur_card">Kartu buram</string>
     <string name="bug_report_manual">Kirim secara manual</string>
     <string name="bug_report_summary">Terjadi kesalahan tak terduga. Maaf jika Anda menemukan bug ini, jika terus terjadi maka \"Hapus data aplikasi\" atau kirim Email </string>

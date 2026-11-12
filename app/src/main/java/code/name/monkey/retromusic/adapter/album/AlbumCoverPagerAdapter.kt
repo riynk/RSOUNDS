@@ -27,7 +27,6 @@ import androidx.lifecycle.lifecycleScope
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.activities.MainActivity
 import code.name.monkey.retromusic.fragments.AlbumCoverStyle
-import code.name.monkey.retromusic.fragments.NowPlayingScreen.*
 import code.name.monkey.retromusic.fragments.base.goToLyrics
 import code.name.monkey.retromusic.glide.RetroGlideExtension
 import code.name.monkey.retromusic.glide.RetroGlideExtension.asBitmapPalette
@@ -146,10 +145,7 @@ class AlbumCoverPagerAdapter(
         }
 
         private fun getLayoutWithPlayerTheme(): Int {
-            return when (PreferenceUtil.nowPlayingScreen) {
-                Card, Fit, Tiny, Classic, Gradient, Full -> R.layout.fragment_album_full_cover
-                Peek -> R.layout.fragment_peek_album_cover
-                else -> {
+            return run {
                     if (PreferenceUtil.isCarouselEffect) {
                         R.layout.fragment_album_carousel_cover
                     } else {
@@ -162,7 +158,6 @@ class AlbumCoverPagerAdapter(
                             AlbumCoverStyle.FullCard -> R.layout.fragment_album_full_card_cover
                         }
                     }
-                }
             }
         }
 
