@@ -23,6 +23,7 @@
         android:shadowColor="@color/md_black_1000"
         android:shadowRadius="10"
         android:textAppearance="@style/TextViewHeadline5"
+        android:textStyle="bold"
         android:textColor="@color/md_white_1000"
         android:visibility="gone"
         tools:visibility="visible" />
