@@ -154,7 +154,7 @@ class CoverLrcView @JvmOverloads constructor(
                     && mPlayDrawable!!.bounds.contains(e.x.toInt(), e.y.toInt())
                 ) {
                     val centerLine = centerLine
-                    val centerLineTime = mLrcEntryList[centerLine].time
+                    val centerLineTime = mLrcEntryList[centerLine].time - timeOffsetMs
                     // onPlayClick 消费了才更新 UI
                     if (mOnPlayClickListener != null && mOnPlayClickListener!!.onPlayClick(
                             centerLineTime
