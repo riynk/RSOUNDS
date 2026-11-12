@@ -154,6 +154,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         lyricsLine2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24f * scale)
         lyricsLine1.setLineSpacing(0f, spacing)
         lyricsLine2.setLineSpacing(0f, spacing)
+        lyricsTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f * scale)
+        lyricsTranslation.setLineSpacing(0f, spacing)
     }
 
     override fun onUpdateProgressViews(progress: Int, total: Int) {
