@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_translate_lyrics"
+        android:icon="@drawable/ic_language"
+        android:title="@string/action_translate_lyrics"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_sync"
         android:title="@string/pref_lyrics_sync_adjust"
         app:showAsAction="never" />
