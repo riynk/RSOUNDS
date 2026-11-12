@@ -20,11 +20,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:gravity="center"
-        android:shadowColor="@color/md_black_1000"
-        android:shadowRadius="10"
         android:textAppearance="@style/TextViewHeadline5"
         android:textStyle="bold"
-        android:textColor="@color/md_white_1000"
+        android:textColor="?android:attr/textColorPrimary"
         android:visibility="gone"
         tools:visibility="visible" />
 
@@ -36,6 +34,8 @@
         android:gravity="center"
         android:translationY="34dp"
         android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
         android:visibility="gone"
         tools:visibility="visible" />
 
