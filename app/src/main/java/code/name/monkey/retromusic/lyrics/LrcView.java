@@ -383,6 +383,19 @@ public class LrcView extends View {
         return !mLrcEntryList.isEmpty();
     }
 
+    public List<String> getLyricTexts() {
+        List<String> texts = new ArrayList<>();
+        for (LrcEntry entry : mLrcEntryList) texts.add(entry.getText());
+        return texts;
+    }
+
+    public void setTranslation(int index, String translation) {
+        if (index < 0 || index >= mLrcEntryList.size()) return;
+        mLrcEntryList.get(index).setSecondText(translation);
+        initEntryList();
+        postInvalidate();
+    }
+
     public void setTimeOffsetMs(long offsetMs) { mTimeOffsetMs = offsetMs; }
 
     public void setLyricStyle(float fontScale, float lineSpacing) {
