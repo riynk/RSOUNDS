@@ -38,6 +38,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     private val lyricsLayout: FrameLayout get() = binding.playerLyrics
     private val lyricsLine1: TextView get() = binding.playerLyricsLine1
     private val lyricsLine2: TextView get() = binding.playerLyricsLine2
+    private val lyricsTranslation: TextView get() = binding.playerLyricsTranslation
 
     private var lyrics: Lyrics? = null
 
@@ -64,11 +65,13 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             playerLyricsLine1.setShadowLayer(0f, 0f, 0f, 0)
             playerLyricsLine2.setTextColor(defaultTextColor)
             playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
+            lyricsTranslation.setTextColor(defaultTextColor)
         }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         if (key == "lyrics_font_scale" || key == "lyrics_line_spacing") applyLyricStyle()
+        if (key == "lyrics_translation_enabled" && !LyricsPreferences.translationEnabled(requireContext())) { lyricsTranslation.text = null; lyricsTranslation.isVisible = false }
         if (key == SHOW_LYRICS) {
             if (sharedPreferences.getBoolean(key, false) == true) {
                 progressViewUpdateHelper?.start()
@@ -116,6 +119,22 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         }
     }
 
+    private fun updateCurrentTranslation(line: String) {
+        if (!LyricsPreferences.translationEnabled(requireContext()) || line.isBlank()) {
+            lyricsTranslation.text = null
+            lyricsTranslation.isVisible = false
+            return
+        }
+        val songPath = MusicPlayerRemote.currentSong.data
+        lifecycleScope.launch {
+            val translated = LyricsPreferences.translate(requireContext(), line)
+            if (songPath == MusicPlayerRemote.currentSong.data && !translated.isNullOrBlank()) {
+                lyricsTranslation.text = translated
+                lyricsTranslation.isVisible = true
+            }
+        }
+    }
+
     private fun applyLyricStyle() {
         val scale = LyricsPreferences.fontScale(requireContext())
         val spacing = LyricsPreferences.lineSpacing(requireContext())
@@ -147,6 +166,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         if (oldLine != line || oldLine.isEmpty()) {
             lyricsLine1.text = oldLine
             lyricsLine2.text = line
+            updateCurrentTranslation(line)
 
             lyricsLine1.isVisible = true
             lyricsLine2.isVisible = true
