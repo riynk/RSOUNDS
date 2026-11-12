@@ -110,13 +110,8 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
             }
 
             R.id.action_toggle_lyrics -> {
-                PreferenceUtil.showLyrics = !PreferenceUtil.showLyrics
+                toggleLyricsAction()
                 showLyricsIcon(item)
-                if (PreferenceUtil.lyricsScreenOn && PreferenceUtil.showLyrics) {
-                    mainActivity.keepScreenOn(true)
-                } else if (!PreferenceUtil.isScreenOnEnabled && !PreferenceUtil.showLyrics) {
-                    mainActivity.keepScreenOn(false)
-                }
                 return true
             }
 
@@ -196,12 +191,7 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
             }
 
             R.id.now_playing -> {
-                requireActivity().findNavController(R.id.fragment_container).navigate(
-                    R.id.playing_queue_fragment,
-                    null,
-                    navOptions { launchSingleTop = true }
-                )
-                mainActivity.collapsePanel()
+                openPlayingQueueAction()
                 return true
             }
 
@@ -216,7 +206,7 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
             }
 
             R.id.action_sleep_timer -> {
-                SleepTimerDialog().show(parentFragmentManager, "SLEEP_TIMER")
+                performSleepTimerAction()
                 return true
             }
 
@@ -250,6 +240,28 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
             }
         }
         return false
+    }
+
+    fun performSleepTimerAction() {
+        SleepTimerDialog().show(parentFragmentManager, "SLEEP_TIMER")
+    }
+
+    fun toggleLyricsAction() {
+        PreferenceUtil.showLyrics = !PreferenceUtil.showLyrics
+        if (PreferenceUtil.lyricsScreenOn && PreferenceUtil.showLyrics) {
+            mainActivity.keepScreenOn(true)
+        } else if (!PreferenceUtil.isScreenOnEnabled && !PreferenceUtil.showLyrics) {
+            mainActivity.keepScreenOn(false)
+        }
+    }
+
+    fun openPlayingQueueAction() {
+        requireActivity().findNavController(R.id.fragment_container).navigate(
+            R.id.playing_queue_fragment,
+            null,
+            navOptions { launchSingleTop = true }
+        )
+        mainActivity.collapsePanel()
     }
 
     private fun showLyricsIcon(item: MenuItem) {
