@@ -221,6 +221,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         updateTitleSong()
         updateLyricsBackground()
         binding.lyricsView.setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
+        binding.lyricsView.setTimeScale(LyricsPreferences.timeScale(requireContext(), song))
         loadLyrics()
     }
 
@@ -254,9 +255,28 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         when (item.itemId) {
             R.id.action_search -> openUrl(googleSearchLrcUrl)
             R.id.action_sync -> adjustLyricsSync()
+            R.id.action_sync_rate -> adjustLyricsRate()
             else -> return false
         }
         return true
+    }
+
+    private fun adjustLyricsRate() {
+        val currentScale = LyricsPreferences.timeScale(requireContext(), song)
+        materialDialog().show {
+            title(res = R.string.pref_lyrics_sync_rate)
+            input(
+                hintRes = R.string.pref_lyrics_sync_rate,
+                prefill = currentScale.toString(),
+                inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            ) { _, value ->
+                val scale = value.toString().toFloatOrNull() ?: return@input
+                LyricsPreferences.setTimeScale(requireContext(), song, scale)
+                binding.lyricsView.setTimeScale(scale)
+            }
+            positiveButton(res = R.string.save)
+            negativeButton(res = android.R.string.cancel)
+        }
     }
 
     private fun adjustLyricsSync() {
