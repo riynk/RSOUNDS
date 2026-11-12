@@ -18,6 +18,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Looper
 import android.text.Layout
@@ -236,6 +237,7 @@ class CoverLrcView @JvmOverloads constructor(
         mDrawableWidth = resources.getDimension(R.dimen.lrc_drawable_width).toInt()
         mTimeTextWidth = resources.getDimension(R.dimen.lrc_time_width).toInt()
         mLrcPaint.isAntiAlias = true
+        mLrcPaint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         mLrcPaint.textSize = mCurrentTextSize
         mLrcPaint.textAlign = Paint.Align.LEFT
         mTimePaint.isAntiAlias = true
