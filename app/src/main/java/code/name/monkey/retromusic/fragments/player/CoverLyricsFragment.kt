@@ -23,6 +23,7 @@ import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
@@ -137,9 +138,10 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
                         LyricUtil.getEmbeddedSyncedLyrics(requestedSong.data)
                     }
                 )
-            } catch (err: FileNotFoundException) {
-                null
-            } catch (e: CannotReadException) {
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // Missing, unreadable or malformed lyric files must not crash playback.
                 null
             }
             withContext(Dispatchers.Main) {
