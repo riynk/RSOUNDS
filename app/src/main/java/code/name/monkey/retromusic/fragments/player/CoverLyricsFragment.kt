@@ -41,6 +41,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     private val lyricsLine1: TextView get() = binding.playerLyricsLine1
     private val lyricsLine2: TextView get() = binding.playerLyricsLine2
     private val lyricsTranslation: TextView get() = binding.playerLyricsTranslation
+    private val lyricsPreviousTranslation: TextView get() = binding.playerLyricsTranslationPrevious
 
     private var lyrics: Lyrics? = null
     private var translationJob: Job? = null
@@ -69,12 +70,13 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             playerLyricsLine2.setTextColor(defaultTextColor)
             playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
             lyricsTranslation.setTextColor(defaultTextColor)
+            lyricsPreviousTranslation.setTextColor(defaultTextColor)
         }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         if (key == "lyrics_font_scale" || key == "lyrics_line_spacing") applyLyricStyle()
-        if (key == "lyrics_translation_enabled" && !LyricsPreferences.translationEnabled(requireContext())) { lyricsTranslation.text = null; lyricsTranslation.isVisible = false }
+        if (key == "lyrics_translation_enabled" && !LyricsPreferences.translationEnabled(requireContext())) { lyricsTranslation.text = null; lyricsTranslation.isVisible = false; lyricsPreviousTranslation.text = null; lyricsPreviousTranslation.isVisible = false }
         if (key == SHOW_LYRICS) {
             if (sharedPreferences.getBoolean(key, false) == true) {
                 progressViewUpdateHelper?.start()
@@ -108,6 +110,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         lyricsLine2.text = null
         lyricsTranslation.text = null
         lyricsTranslation.isVisible = false
+        lyricsPreviousTranslation.text = null
+        lyricsPreviousTranslation.isVisible = false
         val requestedSong = MusicPlayerRemote.currentSong
         lifecycleScope.launch(Dispatchers.IO) {
             val parsed = try {
@@ -147,6 +151,22 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         }
     }
 
+    private fun updatePreviousTranslation(line: String) {
+        if (!LyricsPreferences.translationEnabled(requireContext()) || line.isBlank()) {
+            lyricsPreviousTranslation.text = null
+            lyricsPreviousTranslation.isVisible = false
+            return
+        }
+        val songPath = MusicPlayerRemote.currentSong.data
+        lifecycleScope.launch {
+            val translated = LyricsPreferences.translate(requireContext(), line)
+            if (songPath == MusicPlayerRemote.currentSong.data && lyricsLine1.text.toString() == line && !translated.isNullOrBlank()) {
+                lyricsPreviousTranslation.text = translated
+                lyricsPreviousTranslation.isVisible = true
+            }
+        }
+    }
+
     private fun applyLyricStyle() {
         val scale = LyricsPreferences.fontScale(requireContext())
         val spacing = LyricsPreferences.lineSpacing(requireContext())
@@ -156,6 +176,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         lyricsLine2.setLineSpacing(0f, spacing)
         lyricsTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f * scale)
         lyricsTranslation.setLineSpacing(0f, spacing)
+        lyricsPreviousTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f * scale)
+        lyricsPreviousTranslation.setLineSpacing(0f, spacing)
     }
 
     override fun onUpdateProgressViews(progress: Int, total: Int) {
@@ -180,6 +202,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         if (oldLine != line || oldLine.isEmpty()) {
             lyricsLine1.text = oldLine
             lyricsLine2.text = line
+            updatePreviousTranslation(oldLine)
             updateCurrentTranslation(line)
 
             lyricsLine1.isVisible = true
@@ -219,6 +242,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
                 lyricsLine2.text = null
                 lyricsTranslation.text = null
                 lyricsTranslation.isVisible = false
+                lyricsPreviousTranslation.text = null
+                lyricsPreviousTranslation.isVisible = false
             }
     }
 
