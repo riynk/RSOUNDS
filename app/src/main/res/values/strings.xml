@@ -529,4 +529,11 @@
     <string name="try_retro_music_premium" translatable="false" />
     <string name="listing_files" translatable="false" />
 
+    <string name="pref_lyrics_appearance">Lyrics appearance and translation</string>
+    <string name="pref_lyrics_font_size">Lyrics font size</string>
+    <string name="pref_lyrics_line_spacing">Lyrics line spacing</string>
+    <string name="pref_lyrics_translation">Translate lyrics online</string>
+    <string name="pref_lyrics_translation_language">Translation language</string>
+    <string name="pref_lyrics_translation_language_summary">Enter a language code, for example id, en, ja or ko. Leave empty to use the device language.</string>
+    <string name="pref_lyrics_background_source">Lyrics background artwork</string>
 </resources>
