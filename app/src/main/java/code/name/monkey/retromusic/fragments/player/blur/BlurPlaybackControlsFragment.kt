@@ -30,6 +30,7 @@ import code.name.monkey.retromusic.extensions.applyColor
 import code.name.monkey.retromusic.extensions.getSongInfo
 import code.name.monkey.retromusic.extensions.hide
 import code.name.monkey.retromusic.extensions.show
+import code.name.monkey.retromusic.fragments.NowPlayingScreen.Lyrics
 import code.name.monkey.retromusic.fragments.base.AbsPlayerControlsFragment
 import code.name.monkey.retromusic.fragments.base.goToAlbum
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
@@ -113,7 +114,11 @@ class BlurPlaybackControlsFragment :
         val formattedArtistName = ArtistSeparator.split(song.artistName).joinToString(", ")
         binding.text.text = String.format("%s • %s", formattedArtistName, song.albumName)
 
-        if (PreferenceUtil.isSongInfo) {
+        if (PreferenceUtil.nowPlayingScreen == Lyrics) {
+            binding.title.hide()
+            binding.text.hide()
+            binding.songInfo.hide()
+        } else if (PreferenceUtil.isSongInfo) {
             binding.songInfo.show()
             binding.songInfo.text = getSongInfo(song)
         } else {
