@@ -28,6 +28,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
 import kotlinx.coroutines.launch
+import code.name.monkey.appthemehelper.util.ColorUtil
 import code.name.monkey.appthemehelper.util.MaterialValueHelper
 import code.name.monkey.retromusic.LYRICS_TYPE
 import code.name.monkey.retromusic.R
@@ -291,11 +292,10 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             surfaceColor().isColorLight
         )
 
-        if (PreferenceUtil.isAdaptiveColor) {
-            setLRCViewColors(color.primaryTextColor, color.secondaryTextColor)
-        } else {
-            setLRCViewColors(primaryColor, secondaryColor)
-        }
+        setLRCViewColors(
+            android.graphics.Color.WHITE,
+            ColorUtil.withAlpha(android.graphics.Color.WHITE, 0.5f)
+        )
     }
 
     fun setCallbacks(listener: Callbacks) {

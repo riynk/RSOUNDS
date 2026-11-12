@@ -35,7 +35,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.commit
 import androidx.navigation.fragment.NavHostFragment
 import code.name.monkey.appthemehelper.util.VersionUtils
-import code.name.monkey.retromusic.ADAPTIVE_COLOR_APP
 import code.name.monkey.retromusic.ALBUM_COVER_STYLE
 import code.name.monkey.retromusic.ALBUM_COVER_TRANSFORM
 import code.name.monkey.retromusic.CAROUSEL_EFFECT
@@ -529,10 +528,7 @@ abstract class AbsSlidingMusicPanelActivity : AbsMusicServiceActivity(),
     private fun chooseFragmentForTheme() {
         nowPlayingScreen = PreferenceUtil.nowPlayingScreen
 
-        val fragment: AbsPlayerFragment = when (nowPlayingScreen) {
-            Default -> BlurPlayerFragment()
-            else -> BlurPlayerFragment()
-        } // must extend AbsPlayerFragment
+        val fragment: AbsPlayerFragment = BlurPlayerFragment()
         supportFragmentManager.commit {
             replace(R.id.playerFragmentContainer, fragment)
         }
