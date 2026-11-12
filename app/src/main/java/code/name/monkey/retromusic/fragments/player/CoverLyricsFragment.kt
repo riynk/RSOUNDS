@@ -59,9 +59,9 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     }
 
     fun setColors(color: MediaNotificationProcessor) {
-        val value = TypedValue()
-        requireContext().theme.resolveAttribute(android.R.attr.textColorPrimary, value, true)
-        val defaultTextColor = value.data
+        val attributes = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.textColorPrimary))
+        val defaultTextColor = attributes.getColor(0, 0xFF000000.toInt())
+        attributes.recycle()
         binding.run {
             playerLyrics.background = null
             playerLyricsLine1.setTextColor(defaultTextColor)
