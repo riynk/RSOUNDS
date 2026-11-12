@@ -84,16 +84,16 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
 
     private fun setUpBottomActions() {
         binding.sleepTimerButton.setOnClickListener {
-            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.action_sleep_timer))
+            performSleepTimerAction()
         }
         binding.lyricsButton.setOnClickListener {
-            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.action_toggle_lyrics))
+            toggleLyricsAction()
         }
         binding.favoriteButton.setOnClickListener {
-            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.action_toggle_favorite))
+            toggleFavorite(MusicPlayerRemote.currentSong)
         }
         binding.queueButton.setOnClickListener {
-            onMenuItemClick(binding.playerToolbar.menu.findItem(R.id.now_playing))
+            openPlayingQueueAction()
         }
     }
 
