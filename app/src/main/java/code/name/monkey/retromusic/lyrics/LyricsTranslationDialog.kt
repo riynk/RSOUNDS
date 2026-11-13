@@ -1,5 +1,7 @@
 package code.name.monkey.retromusic.lyrics
 
+import android.graphics.Typeface
+import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -51,13 +53,29 @@ object LyricsTranslationDialog {
                     return@launch
                 }
 
-                val text = TextView(context).apply {
-                    setPadding(24, 16, 24, 16)
-                    textSize = 16f
-                    this.text = sourceText + "\n\n──────────\n\n" + translatedText
+                val content = LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(20, 12, 20, 12)
                 }
+                fun addSection(label: String, value: String, translated: Boolean) {
+                    content.addView(TextView(context).apply {
+                        text = label
+                        textSize = 13f
+                        setTypeface(typeface, Typeface.BOLD)
+                        setPadding(0, if (translated) 20 else 4, 0, 8)
+                    })
+                    content.addView(TextView(context).apply {
+                        text = value
+                        textSize = if (translated) 16f else 14f
+                        setLineSpacing(4f, 1.08f)
+                        setPadding(0, 0, 0, 4)
+                    })
+                }
+                addSection(context.getString(R.string.lyrics_original_text), sourceText, false)
+                addSection(context.getString(R.string.lyrics_translated_text), translatedText, true)
                 val scroll = ScrollView(context).apply {
-                    addView(text)
+                    isFillViewport = true
+                    addView(content)
                 }
                 MaterialAlertDialogBuilder(context)
                     .setTitle(context.getString(R.string.action_translate_lyrics) + " · " +
