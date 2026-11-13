@@ -160,15 +160,19 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     }
 
     private fun setupLyricsView() {
-        val attributes = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.textColorPrimary))
-        val defaultTextColor = attributes.getColor(0, 0xFF000000.toInt())
+        val attributes = requireContext().obtainStyledAttributes(
+            intArrayOf(android.R.attr.textColorPrimary, android.R.attr.textColorSecondary)
+        )
+        val primaryTextColor = attributes.getColor(0, 0xFF000000.toInt())
+        val secondaryTextColor = attributes.getColor(1, 0xFF777777.toInt())
         attributes.recycle()
         binding.lyricsView.apply {
             setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
             setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
             setTimeScale(LyricsPreferences.timeScale(requireContext(), song))
-            setNormalColor(defaultTextColor)
-            setCurrentColor(defaultTextColor)
+            setNormalColor(secondaryTextColor)
+            setCurrentColor(primaryTextColor)
+            setTranslationStyle(secondaryTextColor, 0.86f)
             setTimeTextColor(accentColor())
             setTimelineColor(accentColor())
             setTimelineTextColor(accentColor())
@@ -469,7 +473,7 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                             rendered.setSpan(
-                                StyleSpan(Typeface.NORMAL),
+                                StyleSpan(Typeface.ITALIC),
                                 start,
                                 rendered.length,
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
