@@ -75,12 +75,10 @@ import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.LibraryViewModel
 import code.name.monkey.retromusic.fragments.NowPlayingScreen
 import code.name.monkey.retromusic.fragments.NowPlayingScreen.Default
-import code.name.monkey.retromusic.fragments.NowPlayingScreen.Lyrics
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
 import code.name.monkey.retromusic.fragments.other.MiniPlayerFragment
 import code.name.monkey.retromusic.fragments.player.blur.BlurPlayerFragment
 import code.name.monkey.retromusic.fragments.player.rsound1.Rsound1PlayerFragment
-import code.name.monkey.retromusic.fragments.player.lyrics.LyricsPlayerFragment
 import code.name.monkey.retromusic.fragments.queue.PlayingQueueFragment
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.model.CategoryInfo
@@ -531,10 +529,10 @@ abstract class AbsSlidingMusicPanelActivity : AbsMusicServiceActivity(),
     private fun chooseFragmentForTheme() {
         nowPlayingScreen = PreferenceUtil.nowPlayingScreen
 
-        val fragment: AbsPlayerFragment = when (nowPlayingScreen) {
-            Lyrics -> LyricsPlayerFragment()
-            NowPlayingScreen.Rsound1 -> Rsound1PlayerFragment()
-            else -> BlurPlayerFragment()
+        val fragment: AbsPlayerFragment = if (nowPlayingScreen == NowPlayingScreen.Rsound1) {
+            Rsound1PlayerFragment()
+        } else {
+            BlurPlayerFragment()
         }
         supportFragmentManager.commit {
             replace(R.id.playerFragmentContainer, fragment)
