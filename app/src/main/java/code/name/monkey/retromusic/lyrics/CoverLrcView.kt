@@ -519,6 +519,7 @@ class CoverLrcView @JvmOverloads constructor(
         if (!hasLrc() || width == 0) {
             return
         }
+        mLrcPaint.textSize = mCurrentTextSize
         for (lrcEntry in mLrcEntryList) {
             lrcEntry.init(mLrcPaint, lrcWidth.toInt(), mTextGravity, mTranslationTextColor, mTranslationTextScale)
         }
