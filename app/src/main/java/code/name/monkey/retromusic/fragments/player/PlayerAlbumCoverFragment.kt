@@ -344,8 +344,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     override fun onPageSelected(position: Int) {
         currentPosition = position
-        setArtworkDimmed(PreferenceUtil.showLyrics &&
-            PreferenceUtil.lyricsType != CoverLyricsType.REPLACE_COVER)
+        setArtworkDimmed(artworkDimmed)
         if (binding.viewPager.adapter != null) {
             (binding.viewPager.adapter as AlbumCoverPagerAdapter).receiveColor(
                 colorReceiver,
