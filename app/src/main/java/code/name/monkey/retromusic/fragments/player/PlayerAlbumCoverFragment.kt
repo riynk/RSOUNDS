@@ -47,6 +47,7 @@ import code.name.monkey.retromusic.fragments.base.goToLyrics
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicProgressViewUpdateHelper
 import code.name.monkey.retromusic.lyrics.CoverLrcView
+import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.model.lyrics.Lyrics
 import code.name.monkey.retromusic.transform.CarousalPagerTransformer
 import code.name.monkey.retromusic.transform.ParallaxPagerTransformer
@@ -76,6 +77,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
     }
     private var progressViewUpdateHelper: MusicProgressViewUpdateHelper? = null
     private var lyricsLoadJob: Job? = null
+    private var translationJob: Job? = null
     private var artworkGestureDetector: GestureDetector? = null
 
     private val lrcView: CoverLrcView get() = binding.lyricsView
@@ -95,6 +97,8 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
     private fun updateLyrics() {
         val song = MusicPlayerRemote.currentSong
         lyricsLoadJob?.cancel()
+        translationJob?.cancel()
+        lrcView.clearTranslations()
         lyricsLoadJob = viewLifecycleOwner.lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 val lrcFile = LyricUtil.getSyncedLyricsFile(song)
@@ -119,6 +123,24 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
         }
     }
 
+    private fun translateCoverLyrics(songPath: String, lines: List<String>) {
+        translationJob?.cancel()
+        if (!LyricsPreferences.translationEnabled(requireContext()) || lines.isEmpty()) {
+            lrcView.clearTranslations()
+            return
+        }
+        translationJob = viewLifecycleOwner.lifecycleScope.launch {
+            val translated = LyricsPreferences.translate(requireContext(), lines.joinToString("\n"))
+                ?.lines().orEmpty()
+            if (songPath == MusicPlayerRemote.currentSong.data &&
+                LyricsPreferences.translationEnabled(requireContext()) &&
+                _binding != null
+            ) {
+                lrcView.setTranslations(List(lines.size) { translated.getOrNull(it).orEmpty() })
+            }
+        }
+    }
+
     override fun onUpdateProgressViews(progress: Int, total: Int) {
         binding.lyricsView.updateTime(progress.toLong())
     }
@@ -137,6 +159,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
                     return true
                 }
             })
+        lrcView.onLyricsLoaded = { lines -> translateCoverLyrics(MusicPlayerRemote.currentSong.data, lines) }
         binding.viewPager.isClickable = true
         binding.viewPager.setOnTouchListener { _, event ->
             artworkGestureDetector?.onTouchEvent(event)
@@ -193,10 +216,13 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             .unregisterOnSharedPreferenceChangeListener(this)
         binding.viewPager.removeOnPageChangeListener(this)
         binding.viewPager.setOnTouchListener(null)
+        lrcView.onLyricsLoaded = null
         artworkGestureDetector = null
         progressViewUpdateHelper?.stop()
         lyricsLoadJob?.cancel()
+        translationJob?.cancel()
         lyricsLoadJob = null
+        translationJob = null
         _binding = null
     }
 
@@ -228,6 +254,9 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             }
             LYRICS_TYPE -> {
                 maybeInitLyrics()
+            }
+            "lyrics_translation_enabled", "lyrics_translation_language" -> {
+                translateCoverLyrics(MusicPlayerRemote.currentSong.data, lrcView.lyricTexts)
             }
         }
     }
@@ -331,10 +360,10 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             surfaceColor().isColorLight
         )
 
-        setLRCViewColors(
-            android.graphics.Color.WHITE,
-            ColorUtil.withAlpha(android.graphics.Color.WHITE, 0.5f)
-        )
+        val primary = android.graphics.Color.WHITE
+        val secondary = ColorUtil.withAlpha(primary, 0.62f)
+        setLRCViewColors(primary, secondary)
+        lrcView.setTranslationStyle(secondary, 0.86f)
     }
 
     fun setCallbacks(listener: Callbacks) {
