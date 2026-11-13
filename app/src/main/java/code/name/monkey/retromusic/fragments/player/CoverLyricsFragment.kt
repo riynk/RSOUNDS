@@ -42,11 +42,9 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     private val lyricsLine1: TextView get() = binding.playerLyricsLine1
     private val lyricsLine2: TextView get() = binding.playerLyricsLine2
     private val lyricsTranslation: TextView get() = binding.playerLyricsTranslation
-    private val lyricsPreviousTranslation: TextView get() = binding.playerLyricsTranslationPrevious
 
     private var lyrics: Lyrics? = null
     private var translationJob: Job? = null
-    private var previousTranslationJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,14 +78,10 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         if (key == "lyrics_font_scale" || key == "lyrics_line_spacing") applyLyricStyle()
         if (key == "lyrics_translation_enabled" || key == "lyrics_translation_language") {
             translationJob?.cancel()
-            previousTranslationJob?.cancel()
             if (!LyricsPreferences.translationEnabled(requireContext())) {
                 lyricsTranslation.text = null
                 lyricsTranslation.isVisible = false
-                lyricsPreviousTranslation.text = null
-                lyricsPreviousTranslation.isVisible = false
             } else {
-                updatePreviousTranslation(lyricsLine1.text.toString())
                 updateCurrentTranslation(lyricsLine2.text.toString())
             }
         }
@@ -120,13 +114,10 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     private fun updateLyrics() {
         lyrics = null
         translationJob?.cancel()
-        previousTranslationJob?.cancel()
         lyricsLine1.text = null
         lyricsLine2.text = null
         lyricsTranslation.text = null
         lyricsTranslation.isVisible = false
-        lyricsPreviousTranslation.text = null
-        lyricsPreviousTranslation.isVisible = false
         val requestedSong = MusicPlayerRemote.currentSong
         lifecycleScope.launch(Dispatchers.IO) {
             val parsed = try {
@@ -167,22 +158,6 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         }
     }
 
-    private fun updatePreviousTranslation(line: String) {
-        if (!LyricsPreferences.translationEnabled(requireContext()) || line.isBlank()) {
-            lyricsPreviousTranslation.text = null
-            lyricsPreviousTranslation.isVisible = false
-            return
-        }
-        val songPath = MusicPlayerRemote.currentSong.data
-        previousTranslationJob?.cancel()
-        previousTranslationJob = lifecycleScope.launch {
-            val translated = LyricsPreferences.translate(requireContext(), line)
-            if (LyricsPreferences.translationEnabled(requireContext()) && songPath == MusicPlayerRemote.currentSong.data && lyricsLine1.text.toString() == line && !translated.isNullOrBlank()) {
-                lyricsPreviousTranslation.text = translated
-                lyricsPreviousTranslation.isVisible = true
-            }
-        }
-    }
 
     private fun applyLyricStyle() {
         val scale = LyricsPreferences.fontScale(requireContext())
@@ -193,8 +168,6 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         lyricsLine2.setLineSpacing(0f, spacing)
         lyricsTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f * scale)
         lyricsTranslation.setLineSpacing(0f, spacing)
-        lyricsPreviousTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f * scale)
-        lyricsPreviousTranslation.setLineSpacing(0f, spacing)
     }
 
     override fun onUpdateProgressViews(progress: Int, total: Int) {
@@ -219,7 +192,6 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         if (oldLine != line || oldLine.isEmpty()) {
             lyricsLine1.text = oldLine
             lyricsLine2.text = line
-            updatePreviousTranslation(oldLine)
             updateCurrentTranslation(line)
 
             lyricsLine1.isVisible = true
