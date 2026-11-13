@@ -19,6 +19,7 @@ import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.view.GestureDetector
 import androidx.annotation.ColorInt
 import androidx.core.animation.doOnEnd
 import androidx.core.view.isVisible
@@ -76,6 +77,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
     }
     private var progressViewUpdateHelper: MusicProgressViewUpdateHelper? = null
     private var lyricsLoadJob: Job? = null
+    private var artworkGestureDetector: GestureDetector? = null
 
     private val lrcView: CoverLrcView get() = binding.lyricsView
 
@@ -127,6 +129,19 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentPlayerAlbumCoverBinding.bind(view)
         setupViewPager()
+        artworkGestureDetector = GestureDetector(requireContext(),
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(event: android.view.MotionEvent): Boolean = true
+
+                override fun onDoubleTap(event: android.view.MotionEvent): Boolean {
+                    callbacks?.onFavoriteToggled()
+                    return true
+                }
+            })
+        binding.viewPager.setOnTouchListener { _, event ->
+            artworkGestureDetector?.onTouchEvent(event)
+            false
+        }
         progressViewUpdateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
         maybeInitLyrics()
         lrcView.apply {
@@ -177,6 +192,8 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
         PreferenceManager.getDefaultSharedPreferences(requireContext())
             .unregisterOnSharedPreferenceChangeListener(this)
         binding.viewPager.removeOnPageChangeListener(this)
+        binding.viewPager.setOnTouchListener(null)
+        artworkGestureDetector = null
         progressViewUpdateHelper?.stop()
         lyricsLoadJob?.cancel()
         lyricsLoadJob = null
