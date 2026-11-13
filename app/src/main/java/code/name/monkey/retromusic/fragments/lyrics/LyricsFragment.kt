@@ -15,6 +15,11 @@
 package code.name.monkey.retromusic.fragments.lyrics
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
 import android.app.Activity
 import android.content.SharedPreferences
 import android.net.Uri
@@ -186,13 +191,14 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         val currentSongPath = song.data
         val lines = binding.lyricsView.lyricTexts
         translationJob = viewLifecycleOwner.lifecycleScope.launch {
-            val translations = MutableList(lines.size) { "" }
-            lines.forEachIndexed { index, line ->
-                if (currentSongPath != song.data) return@launch
-                translations[index] = LyricsPreferences.translate(requireContext(), line).orEmpty()
-                if (index % 8 == 7 || index == lines.lastIndex) {
-                    if (currentSongPath == song.data) binding.lyricsView.setTranslations(translations)
-                }
+            val translatedLines = LyricsPreferences.translate(
+                requireContext(),
+                lines.joinToString("\n")
+            )?.lines().orEmpty()
+            if (currentSongPath == song.data) {
+                binding.lyricsView.setTranslations(
+                    List(lines.size) { index -> translatedLines.getOrNull(index).orEmpty() }
+                )
             }
         }
     }
@@ -435,16 +441,41 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         val scale = LyricsPreferences.fontScale(requireContext())
         binding.normalLyrics.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f * scale)
         binding.normalLyrics.setLineSpacing(0f, LyricsPreferences.lineSpacing(requireContext()))
+        translationJob?.cancel()
+        translationSongPath = null
         if (LyricsPreferences.translationEnabled(requireContext()) && !lyrics.isNullOrBlank()) {
             val currentPath = song.data
-            viewLifecycleOwner.lifecycleScope.launch {
-                val translatedLines = lyrics.lines().map { line ->
-                    if (line.isBlank()) "" else LyricsPreferences.translate(requireContext(), line).orEmpty()
-                }
+            val sourceLines = lyrics.lines()
+            translationSongPath = currentPath
+            translationJob = viewLifecycleOwner.lifecycleScope.launch {
+                // Translate the complete text in bounded chunks instead of sending one request per line.
+                val translatedLines = LyricsPreferences.translate(requireContext(), lyrics)
+                    ?.lines().orEmpty()
                 if (currentPath == song.data) {
-                    binding.normalLyrics.text = lyrics.lines().mapIndexed { index, line ->
-                        if (translatedLines[index].isBlank()) line else line + "\n" + translatedLines[index]
-                    }.joinToString("\n\n")
+                    val rendered = SpannableStringBuilder()
+                    sourceLines.forEachIndexed { index, line ->
+                        if (index > 0) rendered.append("\n\n")
+                        rendered.append(line)
+                        val translated = translatedLines.getOrNull(index).orEmpty()
+                        if (translated.isNotBlank()) {
+                            rendered.append("\n")
+                            val start = rendered.length
+                            rendered.append(translated)
+                            rendered.setSpan(
+                                RelativeSizeSpan(0.86f),
+                                start,
+                                rendered.length,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                            rendered.setSpan(
+                                StyleSpan(Typeface.ITALIC),
+                                start,
+                                rendered.length,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                        }
+                    }
+                    binding.normalLyrics.text = rendered
                 }
             }
         }
