@@ -48,7 +48,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/statusBarContainer" />
+        app:layout_constraintTop_toBottomOf="@id/headerContainer" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerContainer"
