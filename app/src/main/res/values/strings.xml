@@ -534,9 +534,16 @@
     <string name="pref_lyrics_appearance">Lyrics appearance and translation</string>
     <string name="pref_lyrics_font_size">Lyrics font size</string>
     <string name="pref_lyrics_line_spacing">Lyrics line spacing</string>
-    <string name="pref_lyrics_translation">Translate lyrics online</string>
+    <string name="pref_lyrics_translation">Show translation icon</string>
+    <string name="pref_lyrics_translation_icon_summary">Show or hide translation actions in Now Playing and the lyrics page.</string>
     <string name="pref_lyrics_translation_language">Translation language</string>
     <string name="pref_lyrics_translation_language_summary">Enter a language code, for example id, en, ja or ko. Leave empty to use the device language.</string>
+    <string name="lyrics_translation_language_prompt">Enter a language code such as id, en, ja or ko.</string>
+    <string name="lyrics_translation_action_translate">Translate current lyrics</string>
+    <string name="lyrics_translation_action_hide">Hide saved translation</string>
+    <string name="lyrics_translation_action_show">Show saved translation</string>
+    <string name="lyrics_translation_action_delete">Delete saved translations</string>
+    <string name="lyrics_translation_delete_confirm">Delete all saved lyric translations from this app? This cannot be undone.</string>
     <string name="pref_lyrics_background_source">Lyrics background artwork</string>
     <string name="now_playing_lyrics">Lyrics</string>
     <string name="action_translate_lyrics">Translate lyrics</string>

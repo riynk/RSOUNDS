@@ -87,11 +87,12 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         updateSongHeader()
         binding.title.setOnClickListener { goToAlbum(requireActivity()) }
         binding.artist.setOnClickListener { goToArtist(requireActivity()) }
+        // Keep the toolbar anchored at the fullscreen position in both fullscreen states.
+        // Reserve only the physical display-cutout inset so the header never moves or covers a notch.
+        binding.statusBarContainer.findViewById<View>(R.id.status_bar)?.isVisible = false
         ViewCompat.setOnApplyWindowInsetsListener(binding.statusBarContainer) { container, insets ->
-            val safeTop = insets.getInsets(
-                WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout()
-            ).top
-            container.updatePadding(top = safeTop)
+            val cutoutTop = insets.getInsets(WindowInsetsCompat.Type.displayCutout()).top
+            container.updatePadding(top = cutoutTop)
             insets
         }
         ViewCompat.requestApplyInsets(binding.statusBarContainer)
@@ -158,6 +159,12 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
             setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
             ToolbarContentTintHelper.colorizeToolbar(this, Color.WHITE, activity)
         }.setOnMenuItemClickListener(this)
+        updateTranslationActionVisibility()
+    }
+
+    private fun updateTranslationActionVisibility() {
+        binding.playerToolbar.menu.findItem(R.id.action_translate_lyrics)?.isVisible =
+            LyricsPreferences.translationIconEnabled(requireContext())
     }
 
     override fun onFavoriteToggled() {
@@ -253,6 +260,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(requireContext())
             .registerOnSharedPreferenceChangeListener(this)
+        updateTranslationActionVisibility()
         updateBlur()
     }
 
@@ -264,6 +272,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == "lyrics_translation_enabled") updateTranslationActionVisibility()
         if (key == SHOW_LYRICS) updateLyricsButtonState()
         if (key == "extra_song_info") updateSongHeader()
         if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source" || key == "lyrics_type") {

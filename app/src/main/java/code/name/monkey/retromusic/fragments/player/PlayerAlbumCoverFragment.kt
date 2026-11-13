@@ -79,10 +79,16 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
     private var lyricsLoadJob: Job? = null
     private var translationJob: Job? = null
     private var artworkGestureDetector: GestureDetector? = null
+    private var artworkDimmed = false
 
     private val lrcView: CoverLrcView get() = binding.lyricsView
 
     var lyrics: Lyrics? = null
+
+    private fun setArtworkDimmed(dimmed: Boolean) {
+        artworkDimmed = dimmed
+        (viewPager.adapter as? AlbumCoverPagerAdapter)?.setArtworkDimmed(dimmed)
+    }
 
     fun removeSlideEffect() {
         val transformer = ParallaxPagerTransformer(R.id.player_image)
@@ -125,19 +131,18 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     private fun translateCoverLyrics(songPath: String, lines: List<String>) {
         translationJob?.cancel()
-        if (!LyricsPreferences.translationEnabled(requireContext()) || lines.isEmpty()) {
+        if (!LyricsPreferences.translationVisible(requireContext()) || lines.isEmpty()) {
             lrcView.clearTranslations()
             return
         }
-        translationJob = viewLifecycleOwner.lifecycleScope.launch {
-            val translated = LyricsPreferences.translate(requireContext(), lines.joinToString("\n"))
-                ?.lines().orEmpty()
-            if (songPath == MusicPlayerRemote.currentSong.data &&
-                LyricsPreferences.translationEnabled(requireContext()) &&
-                _binding != null
-            ) {
-                lrcView.setTranslations(List(lines.size) { translated.getOrNull(it).orEmpty() })
-            }
+        val translated = LyricsPreferences.cachedTranslation(
+            requireContext(), lines.joinToString("\n"),
+            LyricsPreferences.translationLanguage(requireContext())
+        )?.lines().orEmpty()
+        if (songPath == MusicPlayerRemote.currentSong.data && _binding != null) {
+            lrcView.setTranslations(List(lines.size) { translated.getOrNull(it).orEmpty() })
+        } else {
+            lrcView.clearTranslations()
         }
     }
 
@@ -258,7 +263,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             LYRICS_TYPE -> {
                 maybeInitLyrics()
             }
-            "lyrics_translation_enabled", "lyrics_translation_language" -> {
+            "lyrics_translation_visible", "lyrics_translation_language" -> {
                 translateCoverLyrics(MusicPlayerRemote.currentSong.data, lrcView.lyricTexts)
             }
         }
@@ -276,6 +281,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     private fun showLyrics(visible: Boolean) {
         val replaceCover = PreferenceUtil.lyricsType == CoverLyricsType.REPLACE_COVER
+        setArtworkDimmed(visible && !replaceCover)
         binding.coverLyrics.isVisible = visible && !replaceCover
         binding.lyricsView.isVisible = false
         (childFragmentManager.findFragmentById(R.id.cover_lyrics) as? CoverLyricsFragment)
@@ -330,6 +336,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
         }
         binding.viewPager.setCurrentItem(MusicPlayerRemote.position, true)
+        adapter.setArtworkDimmed(artworkDimmed)
         onPageSelected(MusicPlayerRemote.position)
     }
 
@@ -337,6 +344,8 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     override fun onPageSelected(position: Int) {
         currentPosition = position
+        setArtworkDimmed(PreferenceUtil.showLyrics &&
+            PreferenceUtil.lyricsType != CoverLyricsType.REPLACE_COVER)
         if (binding.viewPager.adapter != null) {
             (binding.viewPager.adapter as AlbumCoverPagerAdapter).receiveColor(
                 colorReceiver,

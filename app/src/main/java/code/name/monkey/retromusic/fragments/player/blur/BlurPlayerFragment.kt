@@ -86,6 +86,12 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
             setNavigationOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
             ToolbarContentTintHelper.colorizeToolbar(this, Color.WHITE, activity)
         }.setOnMenuItemClickListener(this)
+        updateTranslationActionVisibility()
+    }
+
+    private fun updateTranslationActionVisibility() {
+        binding.playerToolbar.menu.findItem(R.id.action_translate_lyrics)?.isVisible =
+            LyricsPreferences.translationIconEnabled(requireContext())
     }
 
     override fun onFavoriteToggled() {
@@ -160,6 +166,7 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
         super.onResume()
         PreferenceManager.getDefaultSharedPreferences(requireContext())
             .registerOnSharedPreferenceChangeListener(this)
+        updateTranslationActionVisibility()
         updateBlur()
     }
 
@@ -171,6 +178,7 @@ class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == "lyrics_translation_enabled") updateTranslationActionVisibility()
         if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source" || key == "lyrics_type") {
             updateBlur()
         }

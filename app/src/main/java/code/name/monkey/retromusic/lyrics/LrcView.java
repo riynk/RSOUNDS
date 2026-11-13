@@ -519,7 +519,9 @@ public class LrcView extends View {
                 mLrcPaint.setTextSize(mNormalTextSize);
                 mLrcPaint.setColor(mNormalTextColor);
             }
-            drawText(canvas, mLrcEntryList.get(i).getStaticLayout(), y);
+            StaticLayout lineLayout = mLrcEntryList.get(i).getStaticLayout();
+            lineLayout.getPaint().setColor(i == mCurrentLine ? mCurrentTextColor : mNormalTextColor);
+            drawText(canvas, lineLayout, y);
         }
     }
 

@@ -30,8 +30,20 @@ object LyricsPreferences {
 
     fun fontScale(context: Context) = (prefs(context).getInt(FONT_SCALE, 100) / 100f).coerceIn(.75f, 1.5f)
     fun lineSpacing(context: Context) = (prefs(context).getInt(LINE_SPACING, 100) / 100f).coerceIn(.8f, 1.8f)
-    fun translationEnabled(context: Context) = prefs(context).getBoolean(TRANSLATION_ENABLED, false)
+    fun translationIconEnabled(context: Context) = prefs(context).getBoolean(TRANSLATION_ENABLED, false)
+    fun translationVisible(context: Context) = prefs(context).getBoolean("lyrics_translation_visible", true)
+    fun setTranslationVisible(context: Context, visible: Boolean) {
+        prefs(context).edit { putBoolean("lyrics_translation_visible", visible) }
+    }
     fun translationLanguage(context: Context) = prefs(context).getString(TRANSLATION_LANGUAGE, "")?.takeIf { it.isNotBlank() } ?: java.util.Locale.getDefault().language
+    fun setTranslationLanguage(context: Context, language: String) {
+        prefs(context).edit { putString(TRANSLATION_LANGUAGE, language.trim()) }
+    }
+    fun clearTranslationCache(context: Context): Int {
+        val keys = prefs(context).all.keys.filter { it.startsWith(CACHE_PREFIX) }
+        if (keys.isNotEmpty()) prefs(context).edit { keys.forEach { remove(it) } }
+        return keys.size
+    }
     fun backgroundSource(context: Context) = prefs(context).getString(BACKGROUND_SOURCE, "auto") ?: "auto"
 
     private fun songKey(song: Song): String {
@@ -68,7 +80,7 @@ object LyricsPreferences {
     suspend fun translate(context: Context, text: String, source: String = "auto", force: Boolean = false): String? =
         withContext(Dispatchers.IO) {
             val target = translationLanguage(context)
-            if ((!translationEnabled(context) && !force) || text.isBlank()) return@withContext null
+            if (text.isBlank()) return@withContext null
             cachedTranslation(context, text, target, source)?.let { return@withContext it }
 
             val chunks = splitForTranslation(text, 1800)

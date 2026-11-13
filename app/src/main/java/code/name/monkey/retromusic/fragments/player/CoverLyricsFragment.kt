@@ -74,7 +74,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         if (_binding == null) return
         binding.playerLyricsLine1.isVisible = !translationOnly && binding.playerLyricsLine1.text.isNotEmpty()
         binding.playerLyricsLine2.isVisible = !translationOnly && binding.playerLyricsLine2.text.isNotEmpty()
-        binding.playerLyrics.background = requireContext().getDrawable(R.drawable.lyrics_mask)
+        binding.playerLyrics.background = null
         binding.playerLyricsTranslation.translationY = if (translationOnly) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56f, resources.displayMetrics) else 0f
     }
 
@@ -82,8 +82,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         val primaryTextColor = Color.WHITE
         val secondaryTextColor = ColorUtil.withAlpha(primaryTextColor, 0.62f)
         binding.run {
-            // Keep the artwork dim layer enabled in both Over Cover display modes.
-            playerLyrics.background = requireContext().getDrawable(R.drawable.lyrics_mask)
+            // Artwork dimming is applied directly to the album ImageView.
+            playerLyrics.background = null
             playerLyricsLine1.setTextColor(secondaryTextColor)
             playerLyricsLine1.setShadowLayer(2f, 0f, 1f, Color.BLACK)
             playerLyricsLine2.setTextColor(primaryTextColor)
@@ -95,9 +95,9 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         if (key == "lyrics_font_scale" || key == "lyrics_line_spacing") applyLyricStyle()
-        if (key == "lyrics_translation_enabled" || key == "lyrics_translation_language") {
+        if (key == "lyrics_translation_visible" || key == "lyrics_translation_language") {
             translationJob?.cancel()
-            if (!LyricsPreferences.translationEnabled(requireContext())) {
+            if (!LyricsPreferences.translationVisible(requireContext())) {
                 lyricsTranslation.text = null
                 lyricsTranslation.isVisible = false
             } else {
@@ -164,20 +164,16 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         // Never leave the previous line's translation visible while the next one is loading.
         lyricsTranslation.text = null
         lyricsTranslation.isVisible = false
-        if (!LyricsPreferences.translationEnabled(requireContext()) || line.isBlank()) {
+        if (!LyricsPreferences.translationVisible(requireContext()) || line.isBlank()) {
             lyricsTranslation.text = null
             lyricsTranslation.isVisible = false
             return
         }
-        val songPath = MusicPlayerRemote.currentSong.data
-        translationJob?.cancel()
-        translationJob = lifecycleScope.launch {
-            val translated = LyricsPreferences.translate(requireContext(), line)
-            if (LyricsPreferences.translationEnabled(requireContext()) && songPath == MusicPlayerRemote.currentSong.data && lyricsLine2.text.toString() == line && !translated.isNullOrBlank()) {
-                lyricsTranslation.text = translated
-                lyricsTranslation.isVisible = true
-            }
-        }
+        val translated = LyricsPreferences.cachedTranslation(
+            requireContext(), line, LyricsPreferences.translationLanguage(requireContext())
+        )
+        lyricsTranslation.text = translated
+        lyricsTranslation.isVisible = !translated.isNullOrBlank()
     }
 
 

@@ -14,6 +14,8 @@
  */
 package code.name.monkey.retromusic.adapter.album
 
+import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -44,10 +46,18 @@ class AlbumCoverPagerAdapter(
 
     private var currentColorReceiver: AlbumCoverFragment.ColorReceiver? = null
     private var currentColorReceiverPosition = -1
+    private var artworkDimmed = false
 
     fun updateData(newDataSet: List<Song>) {
         this.dataSet = newDataSet
         notifyDataSetChanged()
+    }
+
+    fun setArtworkDimmed(dimmed: Boolean) {
+        artworkDimmed = dimmed
+        for (position in 0 until count) {
+            (getFragment(position) as? AlbumCoverFragment)?.setArtworkDimmed(dimmed)
+        }
     }
 
     override fun getItemPosition(`object`: Any): Int {
@@ -94,6 +104,15 @@ class AlbumCoverPagerAdapter(
         private lateinit var song: Song
         private var colorReceiver: ColorReceiver? = null
         private var request: Int = 0
+        private var artworkDimmed = false
+
+        fun setArtworkDimmed(dimmed: Boolean) {
+            artworkDimmed = dimmed
+            view?.findViewById<ImageView>(R.id.player_image)?.let { image ->
+                if (dimmed) image.setColorFilter(Color.argb(150, 0, 0, 0), PorterDuff.Mode.SRC_ATOP)
+                else image.clearColorFilter()
+            }
+        }
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -132,6 +151,7 @@ class AlbumCoverPagerAdapter(
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
             loadAlbumCover(albumCover = view.findViewById(R.id.player_image))
+            setArtworkDimmed(artworkDimmed)
         }
 
         override fun onDestroyView() {

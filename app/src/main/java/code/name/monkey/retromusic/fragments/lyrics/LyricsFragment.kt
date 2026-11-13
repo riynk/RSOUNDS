@@ -16,6 +16,7 @@ package code.name.monkey.retromusic.fragments.lyrics
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
+import android.graphics.Color
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
@@ -195,23 +196,22 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     }
 
     private fun startLyricTranslations() {
-        if (!LyricsPreferences.translationEnabled(requireContext()) || !binding.lyricsView.hasLrc()) return
-        if (translationSongPath == song.data) return
-        translationJob?.cancel()
-        translationSongPath = song.data
-        val currentSongPath = song.data
-        val lines = binding.lyricsView.lyricTexts
-        translationJob = viewLifecycleOwner.lifecycleScope.launch {
-            val translatedLines = LyricsPreferences.translate(
-                requireContext(),
-                lines.joinToString("\n")
-            )?.lines().orEmpty()
-            if (currentSongPath == song.data) {
-                binding.lyricsView.setTranslations(
-                    List(lines.size) { index -> translatedLines.getOrNull(index).orEmpty() }
-                )
-            }
+        if (!binding.lyricsView.hasLrc()) return
+        if (!LyricsPreferences.translationVisible(requireContext())) {
+            binding.lyricsView.clearTranslations()
+            translationSongPath = song.data
+            return
         }
+        if (translationSongPath == song.data) return
+        translationSongPath = song.data
+        val lines = binding.lyricsView.lyricTexts
+        val translatedLines = LyricsPreferences.cachedTranslation(
+            requireContext(), lines.joinToString("\n"),
+            LyricsPreferences.translationLanguage(requireContext())
+        )?.lines().orEmpty()
+        binding.lyricsView.setTranslations(
+            List(lines.size) { index -> translatedLines.getOrNull(index).orEmpty() }
+        )
     }
 
     private fun setupViews() {
@@ -266,6 +266,8 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
 
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_lyrics, menu)
+        menu.findItem(R.id.action_translate_lyrics)?.isVisible =
+            LyricsPreferences.translationIconEnabled(requireContext())
         ToolbarContentTintHelper.handleOnCreateOptionsMenu(
             requireContext(),
             binding.toolbar,
@@ -454,57 +456,26 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         binding.normalLyrics.setLineSpacing(0f, LyricsPreferences.lineSpacing(requireContext()))
         translationJob?.cancel()
         translationSongPath = null
-        if (LyricsPreferences.translationEnabled(requireContext()) && !lyrics.isNullOrBlank()) {
-            val currentPath = song.data
-            val sourceLines = lyrics.lines()
-            translationSongPath = currentPath
-            translationJob = viewLifecycleOwner.lifecycleScope.launch {
-                // Translate the complete text in bounded chunks instead of sending one request per line.
-                val translatedLines = LyricsPreferences.translate(requireContext(), lyrics)
-                    ?.lines().orEmpty()
-                if (currentPath == song.data) {
-                    val rendered = SpannableStringBuilder()
-                    sourceLines.forEachIndexed { index, line ->
-                        if (index > 0) rendered.append("\n\n")
-                        rendered.append(line)
-                        val translated = translatedLines.getOrNull(index).orEmpty()
-                        if (translated.isNotBlank()) {
-                            rendered.append("\n")
-                            val start = rendered.length
-                            rendered.append(translated)
-                            rendered.setSpan(
-                                RelativeSizeSpan(0.86f),
-                                start,
-                                rendered.length,
-                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                            rendered.setSpan(
-                                StyleSpan(Typeface.ITALIC),
-                                start,
-                                rendered.length,
-                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                            val secondaryValue = TypedValue()
-                            requireContext().theme.resolveAttribute(
-                                android.R.attr.textColorSecondary,
-                                secondaryValue,
-                                true
-                            )
-                            val secondaryColor = if (secondaryValue.resourceId != 0) {
-                                androidx.core.content.ContextCompat.getColor(requireContext(), secondaryValue.resourceId)
-                            } else {
-                                secondaryValue.data
-                            }
-                            rendered.setSpan(
-                                ForegroundColorSpan(secondaryColor),
-                                start,
-                                rendered.length,
-                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                            )
-                        }
+        if (LyricsPreferences.translationVisible(requireContext()) && !lyrics.isNullOrBlank()) {
+            val translatedLines = LyricsPreferences.cachedTranslation(
+                requireContext(), lyrics, LyricsPreferences.translationLanguage(requireContext())
+            )?.lines().orEmpty()
+            if (translatedLines.any { it.isNotBlank() }) {
+                val rendered = SpannableStringBuilder()
+                lyrics.lines().forEachIndexed { index, line ->
+                    if (index > 0) rendered.append("\n\n")
+                    rendered.append(line)
+                    val translated = translatedLines.getOrNull(index).orEmpty()
+                    if (translated.isNotBlank()) {
+                        rendered.append("\n")
+                        val start = rendered.length
+                        rendered.append(translated)
+                        rendered.setSpan(RelativeSizeSpan(0.86f), start, rendered.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        rendered.setSpan(StyleSpan(Typeface.ITALIC), start, rendered.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        rendered.setSpan(ForegroundColorSpan(Color.argb(160, 255, 255, 255)), start, rendered.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                     }
-                    binding.normalLyrics.text = rendered
                 }
+                binding.normalLyrics.text = rendered
             }
         }
     }
@@ -544,22 +515,23 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     override fun onResume() {
         super.onResume()
         updateHelper.start()
+        binding.toolbar.menu.findItem(R.id.action_translate_lyrics)?.isVisible =
+            LyricsPreferences.translationIconEnabled(requireContext())
         PreferenceManager.getDefaultSharedPreferences(requireContext()).registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            "lyrics_translation_enabled", "lyrics_translation_language" -> {
+            "lyrics_translation_enabled" -> {
+                binding.toolbar.menu.findItem(R.id.action_translate_lyrics)?.isVisible =
+                    LyricsPreferences.translationIconEnabled(requireContext())
+            }
+            "lyrics_translation_visible", "lyrics_translation_language" -> {
                 translationJob?.cancel()
                 translationSongPath = null
                 binding.lyricsView.clearTranslations()
-                if (!LyricsPreferences.translationEnabled(requireContext())) {
-                    if (lyricsType == LyricsType.NORMAL_LYRICS) loadNormalLyrics()
-                } else if (lyricsType == LyricsType.NORMAL_LYRICS) {
-                    loadNormalLyrics()
-                } else {
-                    startLyricTranslations()
-                }
+                if (lyricsType == LyricsType.NORMAL_LYRICS) loadNormalLyrics()
+                else startLyricTranslations()
             }
             "lyrics_font_scale", "lyrics_line_spacing" -> {
                 binding.lyricsView.setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
