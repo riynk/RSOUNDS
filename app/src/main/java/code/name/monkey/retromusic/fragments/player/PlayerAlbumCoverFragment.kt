@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.viewpager.widget.ViewPager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import code.name.monkey.appthemehelper.util.ColorUtil
 import code.name.monkey.appthemehelper.util.MaterialValueHelper
@@ -74,6 +75,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
         }
     }
     private var progressViewUpdateHelper: MusicProgressViewUpdateHelper? = null
+    private var lyricsLoadJob: Job? = null
 
     private val lrcView: CoverLrcView get() = binding.lyricsView
 
@@ -91,23 +93,29 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     private fun updateLyrics() {
         val song = MusicPlayerRemote.currentSong
-        lifecycleScope.launch(Dispatchers.IO) {
-            val lrcFile = LyricUtil.getSyncedLyricsFile(song)
-            if (lrcFile != null) {
-                binding.lyricsView.loadLrc(lrcFile)
-            } else {
-                val embeddedLyrics = LyricUtil.getEmbeddedSyncedLyrics(song.data)
-                if (embeddedLyrics != null) {
-                    binding.lyricsView.loadLrc(embeddedLyrics)
+        lyricsLoadJob?.cancel()
+        lyricsLoadJob = viewLifecycleOwner.lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                val lrcFile = LyricUtil.getSyncedLyricsFile(song)
+                if (lrcFile != null) {
+                    lrcFile to null
                 } else {
-                    withContext(Dispatchers.Main) {
-                        binding.lyricsView.reset()
-                        binding.lyricsView.setLabel(context?.getString(R.string.no_lyrics_found))
-                    }
+                    null to LyricUtil.getEmbeddedSyncedLyrics(song.data)
+                }
+            }
+
+            // A track can change while its lyrics are being read from storage.
+            if (MusicPlayerRemote.currentSong.data != song.data) return@launch
+            val (lrcFile, embeddedLyrics) = result
+            when {
+                lrcFile != null -> binding.lyricsView.loadLrc(lrcFile)
+                embeddedLyrics != null -> binding.lyricsView.loadLrc(embeddedLyrics)
+                else -> {
+                    binding.lyricsView.reset()
+                    binding.lyricsView.setLabel(getString(R.string.no_lyrics_found))
                 }
             }
         }
-
     }
 
     override fun onUpdateProgressViews(progress: Int, total: Int) {
@@ -170,6 +178,8 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             .unregisterOnSharedPreferenceChangeListener(this)
         binding.viewPager.removeOnPageChangeListener(this)
         progressViewUpdateHelper?.stop()
+        lyricsLoadJob?.cancel()
+        lyricsLoadJob = null
         _binding = null
     }
 
