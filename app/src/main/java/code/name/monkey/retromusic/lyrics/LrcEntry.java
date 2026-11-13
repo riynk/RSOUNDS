@@ -15,6 +15,12 @@
 package code.name.monkey.retromusic.lyrics;
 
 import android.text.Layout;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
+import android.graphics.Typeface;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -45,6 +51,10 @@ class LrcEntry implements Comparable<LrcEntry> {
   }
 
   void init(TextPaint paint, int width, int gravity) {
+    init(paint, width, gravity, paint.getColor(), 0.86f);
+  }
+
+  void init(TextPaint paint, int width, int gravity, int translationColor, float translationScale) {
     Layout.Alignment align;
     switch (gravity) {
       case GRAVITY_LEFT:
@@ -60,7 +70,8 @@ class LrcEntry implements Comparable<LrcEntry> {
         align = Layout.Alignment.ALIGN_OPPOSITE;
         break;
     }
-    staticLayout = new StaticLayout(getShowText(), paint, width, align, 1f, 0f, false);
+    CharSequence displayText = getShowText(translationColor, translationScale);
+    staticLayout = new StaticLayout(displayText, paint, width, align, 1f, 0f, false);
 
     offset = Float.MIN_VALUE;
   }
@@ -96,12 +107,18 @@ class LrcEntry implements Comparable<LrcEntry> {
     this.secondText = secondText;
   }
 
-  private String getShowText() {
-    if (!TextUtils.isEmpty(secondText)) {
-      return text + "\n" + secondText;
-    } else {
-      return text;
-    }
+  private CharSequence getShowText(int translationColor, float translationScale) {
+    if (TextUtils.isEmpty(secondText)) return text;
+    SpannableStringBuilder result = new SpannableStringBuilder(text).append("\n");
+    int start = result.length();
+    result.append(secondText);
+    result.setSpan(new RelativeSizeSpan(Math.max(0.7f, Math.min(1f, translationScale))),
+        start, result.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    result.setSpan(new StyleSpan(Typeface.ITALIC), start, result.length(),
+        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    result.setSpan(new ForegroundColorSpan(translationColor), start, result.length(),
+        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    return result;
   }
 
   @Override
