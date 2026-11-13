@@ -1,6 +1,7 @@
 package code.name.monkey.retromusic.fragments.player
 
 import android.content.SharedPreferences
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
@@ -76,16 +77,20 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     }
 
     fun setColors(color: MediaNotificationProcessor) {
-        val attributes = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.textColorPrimary))
-        val defaultTextColor = attributes.getColor(0, 0xFF000000.toInt())
+        val attributes = requireContext().obtainStyledAttributes(
+            intArrayOf(android.R.attr.textColorPrimary, android.R.attr.textColorSecondary)
+        )
+        val primaryTextColor = attributes.getColor(0, 0xFFFFFFFF.toInt())
+        val secondaryTextColor = attributes.getColor(1, 0xFFCCCCCC.toInt())
         attributes.recycle()
         binding.run {
             playerLyrics.background = null
-            playerLyricsLine1.setTextColor(defaultTextColor)
+            playerLyricsLine1.setTextColor(primaryTextColor)
             playerLyricsLine1.setShadowLayer(0f, 0f, 0f, 0)
-            playerLyricsLine2.setTextColor(defaultTextColor)
+            playerLyricsLine2.setTextColor(primaryTextColor)
             playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
-            lyricsTranslation.setTextColor(defaultTextColor)
+            lyricsTranslation.setTextColor(secondaryTextColor)
+            lyricsTranslation.setTypeface(lyricsTranslation.typeface, Typeface.ITALIC)
         }
     }
 
