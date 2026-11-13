@@ -17,6 +17,7 @@ package code.name.monkey.retromusic.fragments.player.blur
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintSet
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
 import android.widget.TextView
@@ -100,6 +101,14 @@ class BlurPlaybackControlsFragment :
         if (PreferenceUtil.nowPlayingScreen == Lyrics) {
             binding.title.hide()
             binding.text.hide()
+            binding.songInfo.hide()
+            ConstraintSet().apply {
+                clone(binding.root)
+                clear(R.id.playPauseButton, ConstraintSet.BOTTOM)
+                connect(R.id.playPauseButton, ConstraintSet.TOP, R.id.progressSlider, ConstraintSet.BOTTOM,
+                    (32 * resources.displayMetrics.density).toInt())
+                applyTo(binding.root)
+            }
         } else {
             binding.title.show()
             binding.text.show()
