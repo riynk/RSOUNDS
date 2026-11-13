@@ -53,6 +53,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         progressViewUpdateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
         applyLyricStyle()
         binding.root.isVisible = PreferenceUtil.showLyrics
+        applyTranslationOnlyState()
         if (PreferenceUtil.showLyrics) {
             progressViewUpdateHelper?.start()
         }
@@ -63,12 +64,15 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
 
     fun setTranslationOnly(enabled: Boolean) {
         translationOnly = enabled
-        if (_binding != null) {
-            binding.playerLyricsLine1.isVisible = !enabled && binding.playerLyricsLine1.text.isNotEmpty()
-            binding.playerLyricsLine2.isVisible = !enabled && binding.playerLyricsLine2.text.isNotEmpty()
-            binding.playerLyrics.background = if (enabled) null else requireContext().getDrawable(R.drawable.lyrics_mask)
-            binding.playerLyricsTranslation.translationY = if (enabled) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56f, resources.displayMetrics) else 0f
-        }
+        applyTranslationOnlyState()
+    }
+
+    private fun applyTranslationOnlyState() {
+        if (_binding == null) return
+        binding.playerLyricsLine1.isVisible = !translationOnly && binding.playerLyricsLine1.text.isNotEmpty()
+        binding.playerLyricsLine2.isVisible = !translationOnly && binding.playerLyricsLine2.text.isNotEmpty()
+        binding.playerLyrics.background = if (translationOnly) null else requireContext().getDrawable(R.drawable.lyrics_mask)
+        binding.playerLyricsTranslation.translationY = if (translationOnly) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56f, resources.displayMetrics) else 0f
     }
 
     fun setColors(color: MediaNotificationProcessor) {
