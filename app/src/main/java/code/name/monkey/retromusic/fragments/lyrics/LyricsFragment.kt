@@ -20,6 +20,7 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
+import android.text.style.ForegroundColorSpan
 import android.app.Activity
 import android.content.SharedPreferences
 import android.net.Uri
@@ -468,7 +469,24 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                             )
                             rendered.setSpan(
-                                StyleSpan(Typeface.ITALIC),
+                                StyleSpan(Typeface.NORMAL),
+                                start,
+                                rendered.length,
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                            )
+                            val secondaryValue = TypedValue()
+                            requireContext().theme.resolveAttribute(
+                                android.R.attr.textColorSecondary,
+                                secondaryValue,
+                                true
+                            )
+                            val secondaryColor = if (secondaryValue.resourceId != 0) {
+                                androidx.core.content.ContextCompat.getColor(requireContext(), secondaryValue.resourceId)
+                            } else {
+                                secondaryValue.data
+                            }
+                            rendered.setSpan(
+                                ForegroundColorSpan(secondaryColor),
                                 start,
                                 rendered.length,
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
