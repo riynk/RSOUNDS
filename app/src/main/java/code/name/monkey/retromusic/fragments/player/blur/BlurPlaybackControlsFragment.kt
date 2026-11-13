@@ -105,8 +105,21 @@ class BlurPlaybackControlsFragment :
             ConstraintSet().apply {
                 clone(binding.root)
                 clear(R.id.playPauseButton, ConstraintSet.BOTTOM)
-                connect(R.id.playPauseButton, ConstraintSet.TOP, R.id.progressSlider, ConstraintSet.BOTTOM,
-                    (32 * resources.displayMetrics.density).toInt())
+                connect(
+                    R.id.playPauseButton,
+                    ConstraintSet.TOP,
+                    R.id.progressSlider,
+                    ConstraintSet.BOTTOM,
+                    (16 * resources.displayMetrics.density).toInt()
+                )
+                clear(R.id.volumeFragmentContainer, ConstraintSet.BOTTOM)
+                connect(
+                    R.id.volumeFragmentContainer,
+                    ConstraintSet.TOP,
+                    R.id.playPauseButton,
+                    ConstraintSet.BOTTOM,
+                    (8 * resources.displayMetrics.density).toInt()
+                )
                 applyTo(binding.root)
             }
         } else {
