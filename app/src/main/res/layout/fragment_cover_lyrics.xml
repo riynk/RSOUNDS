@@ -14,53 +14,48 @@
     tools:alpha="1"
     tools:visibility="visible">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/player_lyrics_line1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:textAppearance="@style/TextViewHeadline5"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorPrimary"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/player_lyrics_translation"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:translationY="34dp"
-        android:textSize="14sp"
-        android:textStyle="normal"
-        android:textColor="?android:attr/textColorSecondary"
-        android:visibility="gone"
-        tools:visibility="visible" />
+        android:orientation="vertical">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/player_lyrics_translation_previous"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:translationY="-34dp"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorPrimary"
-        android:visibility="gone" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/player_lyrics_line1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@style/TextViewHeadline5"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/player_lyrics_line2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:gravity="center"
-        android:shadowColor="@color/md_black_1000"
-        android:shadowRadius="10"
-        android:textAppearance="@style/TextViewHeadline5"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorPrimary"
-        tools:text="@tools:sample/full_names[5]" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/player_lyrics_line2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:shadowColor="@color/md_black_1000"
+            android:shadowRadius="10"
+            android:textAppearance="@style/TextViewHeadline5"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
+            tools:text="@tools:sample/full_names[5]" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/player_lyrics_translation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:lineSpacingExtra="3dp"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            android:textColor="?android:attr/textColorSecondary"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </LinearLayout>
 </FrameLayout>
