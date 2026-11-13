@@ -191,7 +191,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         lyricsLine2.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 24f * scale)
         lyricsLine1.setLineSpacing(0f, spacing)
         lyricsLine2.setLineSpacing(0f, spacing)
-        lyricsTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f * scale)
+        lyricsTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f * scale)
         lyricsTranslation.setLineSpacing(0f, spacing)
         lyricsPreviousTranslation.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 12f * scale)
         lyricsPreviousTranslation.setLineSpacing(0f, spacing)
