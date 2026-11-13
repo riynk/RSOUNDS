@@ -63,6 +63,9 @@ import code.name.monkey.retromusic.fragments.LibraryViewModel
 import code.name.monkey.retromusic.fragments.ReloadType
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
 import code.name.monkey.retromusic.lyrics.LyricsTranslationDialog
+import org.jaudiotagger.audio.AudioFileIO
+import org.jaudiotagger.tag.FieldKey
+import java.io.File
 import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.interfaces.IPaletteColorHolder
@@ -99,10 +102,17 @@ abstract class AbsPlayerFragment(@LayoutRes layout: Int) : AbsMusicServiceFragme
             R.id.action_translate_lyrics -> {
                 lifecycleScope.launch(IO) {
                     val synced = LyricUtil.getStringFromLrc(LyricUtil.getSyncedLyricsFile(song))
-                    val embedded = if (synced.isBlank()) {
+                    val embeddedSynced = if (synced.isBlank()) {
                         LyricUtil.getEmbeddedSyncedLyrics(song.data).orEmpty()
                     } else {
                         synced
+                    }
+                    val embedded = if (embeddedSynced.isNotBlank()) {
+                        embeddedSynced
+                    } else {
+                        runCatching {
+                            AudioFileIO.read(File(song.data)).tagOrCreateDefault.getFirst(FieldKey.LYRICS)
+                        }.getOrNull().orEmpty()
                     }
                     val lines = embedded.lineSequence().map { sourceLine ->
                         var line = sourceLine.trim()
