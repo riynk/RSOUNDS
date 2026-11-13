@@ -244,8 +244,10 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     private fun showLyrics(visible: Boolean) {
         val replaceCover = PreferenceUtil.lyricsType == CoverLyricsType.REPLACE_COVER
-        binding.coverLyrics.isVisible = false
+        binding.coverLyrics.isVisible = visible && replaceCover
         binding.lyricsView.isVisible = false
+        (childFragmentManager.findFragmentById(R.id.cover_lyrics) as? CoverLyricsFragment)
+            ?.setTranslationOnly(replaceCover)
 
         if (replaceCover) {
             // Fade the artwork out before removing it from hit testing, so the lyrics
