@@ -540,6 +540,8 @@
     <string name="pref_lyrics_background_source">Lyrics background artwork</string>
     <string name="now_playing_lyrics">Lyrics</string>
     <string name="action_translate_lyrics">Translate lyrics</string>
+    <string name="lyrics_original_text">Original lyrics</string>
+    <string name="lyrics_translated_text">Translation</string>
     <string name="lyrics_translation_loading">Translating lyrics…</string>
     <string name="lyrics_translation_failed">Translation is unavailable. Check your connection and try again.</string>
     <string name="lyrics_translation_no_lyrics">No lyrics are available to translate.</string>
