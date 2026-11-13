@@ -243,20 +243,26 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
     }
 
     private fun showLyrics(visible: Boolean) {
+        val replaceCover = PreferenceUtil.lyricsType == CoverLyricsType.REPLACE_COVER
         binding.coverLyrics.isVisible = false
         binding.lyricsView.isVisible = false
-        binding.viewPager.isVisible = true
-        val lyrics: View = if (PreferenceUtil.lyricsType == CoverLyricsType.REPLACE_COVER) {
-            ObjectAnimator.ofFloat(viewPager, View.ALPHA, if (visible) 0F else 1F).start()
-            lrcView
-        } else {
-            ObjectAnimator.ofFloat(viewPager, View.ALPHA, 1F).start()
-            binding.coverLyrics
-        }
-        ObjectAnimator.ofFloat(lyrics, View.ALPHA, if (visible) 1F else 0F).apply {
-            doOnEnd {
-                lyrics.isVisible = visible
+
+        if (replaceCover) {
+            // Keep the artwork visible during the fade, then remove it from hit testing
+            // so the replacement lyrics view receives gestures and taps.
+            binding.viewPager.isVisible = true
+            ObjectAnimator.ofFloat(viewPager, View.ALPHA, if (visible) 0F else 1F).apply {
+                doOnEnd { binding.viewPager.isVisible = !visible }
+                start()
             }
+        } else {
+            binding.viewPager.isVisible = true
+            ObjectAnimator.ofFloat(viewPager, View.ALPHA, 1F).start()
+        }
+
+        val lyrics: View = if (replaceCover) lrcView else binding.coverLyrics
+        ObjectAnimator.ofFloat(lyrics, View.ALPHA, if (visible) 1F else 0F).apply {
+            doOnEnd { lyrics.isVisible = visible }
             start()
         }
     }
