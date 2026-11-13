@@ -51,6 +51,7 @@ import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.model.Album
 import code.name.monkey.retromusic.model.Artist
+import code.name.monkey.retromusic.util.LyricUtil
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.CoverLyricsType
 import code.name.monkey.retromusic.util.PreferenceUtil.blurAmount
@@ -246,11 +247,30 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
             }
     }
 
+    private fun updateLyricsFormat() {
+        val song = MusicPlayerRemote.currentSong
+        val audioFile = java.io.File(song.data)
+        val ttmlFile = audioFile.parentFile?.resolve("${audioFile.nameWithoutExtension}.ttml")
+        val hasTtml = ttmlFile?.isFile == true
+        val hasLrc = LyricUtil.getSyncedLyricsFile(song)?.isFile == true ||
+            !LyricUtil.getEmbeddedSyncedLyrics(song.data).isNullOrBlank()
+
+        binding.lyricsFormat.apply {
+            text = when {
+                hasTtml -> "TTML"
+                hasLrc -> "LRC"
+                else -> ""
+            }
+            visibility = if (hasTtml || hasLrc) View.VISIBLE else View.GONE
+        }
+    }
+
     private fun updateSongHeader() {
         val song = MusicPlayerRemote.currentSong
         binding.title.text = song.title
         binding.artist.text = song.artistName
         binding.album.text = song.albumName
+        updateLyricsFormat()
         binding.songInfoBottom.apply {
             text = getSongInfo(song)
             visibility = if (PreferenceUtil.isSongInfo) View.VISIBLE else View.GONE
