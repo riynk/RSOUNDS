@@ -17,6 +17,7 @@ package code.name.monkey.retromusic.fragments.player.blur
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.LayoutRes
 import androidx.constraintlayout.widget.ConstraintSet
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
@@ -41,8 +42,9 @@ import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import com.google.android.material.slider.Slider
 
-class BlurPlaybackControlsFragment :
-    AbsPlayerControlsFragment(R.layout.fragment_blur_player_playback_controls) {
+open class BlurPlaybackControlsFragment(
+    @LayoutRes layout: Int = R.layout.fragment_blur_player_playback_controls
+) : AbsPlayerControlsFragment(layout) {
     private var _binding: FragmentBlurPlayerPlaybackControlsBinding? = null
     private val binding get() = _binding!!
 
