@@ -126,7 +126,7 @@
 
                 <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/playbackControlsFragment"
-                    android:name="code.name.monkey.retromusic.fragments.player.blur.BlurPlaybackControlsFragment"
+                    android:name="code.name.monkey.retromusic.fragments.player.rsound2.Rsound2PlaybackControlsFragment"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
