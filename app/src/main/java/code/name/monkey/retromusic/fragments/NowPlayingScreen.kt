@@ -28,5 +28,5 @@ enum class NowPlayingScreen constructor(
     // Some Now playing themes look better with particular Album cover theme
 
     Default(R.string.now_playing_default, R.drawable.np_blur, 4, AlbumCoverStyle.Normal),
-    Rsound1(R.string.now_playing_rsound1, R.drawable.np_blur, 5, AlbumCoverStyle.Normal),
+    Rsound2(R.string.now_playing_rsound2, R.drawable.np_blur, 5, AlbumCoverStyle.Normal),
 }
