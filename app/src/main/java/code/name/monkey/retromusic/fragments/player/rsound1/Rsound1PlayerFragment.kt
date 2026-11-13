@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.preference.PreferenceManager
 import code.name.monkey.appthemehelper.util.ToolbarContentTintHelper
 import code.name.monkey.retromusic.NEW_BLUR_AMOUNT
@@ -53,6 +54,12 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentRsound1Binding.bind(view)
+        // AbsPlayerFragment hides the status-bar spacer in fullscreen mode.
+        // Rsound 1 anchors its metadata header below that spacer, so keep the
+        // spacer measured to prevent the whole header from jumping to the top.
+        if (PreferenceUtil.isFullScreenMode) {
+            view.findViewById<View>(R.id.status_bar)?.isVisible = true
+        }
         setUpSubFragments()
         setUpPlayerToolbar()
         binding.playerToolbar.drawAboveSystemBars()
