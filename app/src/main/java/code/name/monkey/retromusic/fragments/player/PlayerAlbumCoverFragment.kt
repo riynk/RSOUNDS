@@ -336,7 +336,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
         }
         binding.viewPager.setCurrentItem(MusicPlayerRemote.position, true)
-        adapter.setArtworkDimmed(artworkDimmed)
+        (binding.viewPager.adapter as? AlbumCoverPagerAdapter)?.setArtworkDimmed(artworkDimmed)
         onPageSelected(MusicPlayerRemote.position)
     }
 
