@@ -56,12 +56,14 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
         setUpSubFragments()
         setUpPlayerToolbar()
         binding.playerToolbar.drawAboveSystemBars()
-        bindSongActions()
         updateSongMetadata()
     }
 
     private fun setUpSubFragments() {
         playbackControlsFragment = whichFragment(R.id.playbackControlsFragment)
+        playbackControlsFragment.viewLifecycleOwnerLiveData.observe(viewLifecycleOwner) { owner ->
+            if (owner != null) bindSongActions()
+        }
         val coverFragment: PlayerAlbumCoverFragment = whichFragment(R.id.playerAlbumCoverFragment)
         coverFragment.setCallbacks(this)
     }
