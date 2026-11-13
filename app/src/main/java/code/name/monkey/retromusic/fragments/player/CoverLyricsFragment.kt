@@ -2,6 +2,8 @@ package code.name.monkey.retromusic.fragments.player
 
 import android.content.SharedPreferences
 import android.graphics.Typeface
+import android.graphics.Color
+import code.name.monkey.appthemehelper.util.ColorUtil
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
@@ -72,23 +74,20 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         if (_binding == null) return
         binding.playerLyricsLine1.isVisible = !translationOnly && binding.playerLyricsLine1.text.isNotEmpty()
         binding.playerLyricsLine2.isVisible = !translationOnly && binding.playerLyricsLine2.text.isNotEmpty()
-        binding.playerLyrics.background = if (translationOnly) null else requireContext().getDrawable(R.drawable.lyrics_mask)
+        binding.playerLyrics.background = requireContext().getDrawable(R.drawable.lyrics_mask)
         binding.playerLyricsTranslation.translationY = if (translationOnly) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56f, resources.displayMetrics) else 0f
     }
 
     fun setColors(color: MediaNotificationProcessor) {
-        val attributes = requireContext().obtainStyledAttributes(
-            intArrayOf(android.R.attr.textColorPrimary, android.R.attr.textColorSecondary)
-        )
-        val primaryTextColor = attributes.getColor(0, 0xFFFFFFFF.toInt())
-        val secondaryTextColor = attributes.getColor(1, 0xFFCCCCCC.toInt())
-        attributes.recycle()
+        val primaryTextColor = Color.WHITE
+        val secondaryTextColor = ColorUtil.withAlpha(primaryTextColor, 0.62f)
         binding.run {
-            playerLyrics.background = null
+            // Keep the artwork dim layer enabled in both Over Cover display modes.
+            playerLyrics.background = requireContext().getDrawable(R.drawable.lyrics_mask)
             playerLyricsLine1.setTextColor(secondaryTextColor)
-            playerLyricsLine1.setShadowLayer(0f, 0f, 0f, 0)
+            playerLyricsLine1.setShadowLayer(2f, 0f, 1f, Color.BLACK)
             playerLyricsLine2.setTextColor(primaryTextColor)
-            playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
+            playerLyricsLine2.setShadowLayer(3f, 0f, 1f, Color.BLACK)
             lyricsTranslation.setTextColor(secondaryTextColor)
             lyricsTranslation.setTypeface(lyricsTranslation.typeface, Typeface.ITALIC)
         }
