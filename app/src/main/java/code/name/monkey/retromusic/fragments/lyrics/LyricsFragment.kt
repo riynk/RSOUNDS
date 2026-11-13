@@ -34,6 +34,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.navigation.fragment.findNavController
@@ -134,6 +137,16 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         enterTransition = Fade()
         exitTransition = Fade()
         _binding = FragmentLyricsBinding.bind(view)
+        // Draw the artwork background edge-to-edge, but keep the toolbar below the
+        // same reserved status-bar inset whether the system bar is visible or hidden.
+        ViewCompat.setOnApplyWindowInsetsListener(binding.container) { _, insets ->
+            val stableTop = insets.getInsetsIgnoringVisibility(
+                WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout()
+            ).top
+            binding.appBarLayout.updatePadding(top = stableTop)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.container)
         updateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
         updateTitleSong()
         setupLyricsView()
