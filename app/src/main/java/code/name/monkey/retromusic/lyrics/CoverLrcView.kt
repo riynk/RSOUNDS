@@ -59,6 +59,8 @@ class CoverLrcView @JvmOverloads constructor(
     private var mNormalTextColor = 0
     private var mNormalTextSize = 0f
     private var mCurrentTextColor = 0
+    private var mTranslationTextColor = 0
+    private var mTranslationTextScale = 0.86f
     private var mCurrentTextSize = 0f
     private var mTimelineTextColor = 0
     private var mTimelineColor = 0
@@ -204,6 +206,7 @@ class CoverLrcView @JvmOverloads constructor(
             R.styleable.LrcView_lrcCurrentTextColor,
             ContextCompat.getColor(context, R.color.lrc_current_text_color)
         )
+        mTranslationTextColor = mNormalTextColor
         mTimelineTextColor = ta.getColor(
             R.styleable.LrcView_lrcTimelineTextColor,
             ContextCompat.getColor(context, R.color.lrc_timeline_text_color)
@@ -260,6 +263,13 @@ class CoverLrcView @JvmOverloads constructor(
 
     fun setCurrentColor(currentColor: Int) {
         mCurrentTextColor = currentColor
+        postInvalidate()
+    }
+
+    fun setTranslationStyle(color: Int, scale: Float = 0.86f) {
+        mTranslationTextColor = color
+        mTranslationTextScale = scale.coerceIn(0.7f, 1f)
+        initEntryList()
         postInvalidate()
     }
 
@@ -320,6 +330,23 @@ class CoverLrcView @JvmOverloads constructor(
 
     fun hasLrc(): Boolean {
         return mLrcEntryList.isNotEmpty()
+    }
+
+    val lyricTexts: List<String>
+        get() = mLrcEntryList.map { it.text }
+
+    fun setTranslations(translations: List<String>) {
+        mLrcEntryList.forEachIndexed { index, entry ->
+            entry.setSecondText(translations.getOrNull(index)?.takeIf { it.isNotBlank() })
+        }
+        initEntryList()
+        invalidate()
+    }
+
+    fun clearTranslations() {
+        mLrcEntryList.forEach { it.setSecondText(null) }
+        initEntryList()
+        invalidate()
     }
 
     fun setTimeOffsetMs(offsetMs: Long) { timeOffsetMs = offsetMs }
@@ -488,7 +515,7 @@ class CoverLrcView @JvmOverloads constructor(
             return
         }
         for (lrcEntry in mLrcEntryList) {
-            lrcEntry.init(mLrcPaint, lrcWidth.toInt(), mTextGravity)
+            lrcEntry.init(mLrcPaint, lrcWidth.toInt(), mTextGravity, mTranslationTextColor, mTranslationTextScale)
         }
         mOffset = (height / 2).toFloat()
     }
