@@ -2,7 +2,6 @@ package code.name.monkey.retromusic.fragments.player.rsound2
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isVisible
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.fragments.player.blur.BlurPlayerFragment
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
@@ -16,9 +15,6 @@ class Rsound2PlayerFragment : BlurPlayerFragment(R.layout.fragment_rsound2) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        if (code.name.monkey.retromusic.util.PreferenceUtil.isFullScreenMode) {
-            view.findViewById<View>(R.id.status_bar)?.isVisible = true
-        }
         updateHeader(view)
     }
 
