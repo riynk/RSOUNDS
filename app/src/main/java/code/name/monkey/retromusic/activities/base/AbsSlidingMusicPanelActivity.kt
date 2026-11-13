@@ -399,7 +399,7 @@ abstract class AbsSlidingMusicPanelActivity : AbsMusicServiceActivity(),
             navigationBarColor = surfaceColor()
             setTaskDescColor(paletteColor)
             val isColorLight = paletteColor.isColorLight
-            if (nowPlayingScreen == Default) {
+            if (nowPlayingScreen == Default || nowPlayingScreen == NowPlayingScreen.Rsound1) {
                 animateNavigationBarColor(android.graphics.Color.BLACK)
                 navigationBarColor = android.graphics.Color.BLACK
                 setLightStatusBar(false)
