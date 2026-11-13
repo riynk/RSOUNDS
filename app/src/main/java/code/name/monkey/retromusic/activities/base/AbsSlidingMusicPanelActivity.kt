@@ -78,7 +78,7 @@ import code.name.monkey.retromusic.fragments.NowPlayingScreen.Default
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
 import code.name.monkey.retromusic.fragments.other.MiniPlayerFragment
 import code.name.monkey.retromusic.fragments.player.blur.BlurPlayerFragment
-import code.name.monkey.retromusic.fragments.player.rsound1.Rsound1PlayerFragment
+import code.name.monkey.retromusic.fragments.player.rsound2.Rsound2PlayerFragment
 import code.name.monkey.retromusic.fragments.queue.PlayingQueueFragment
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.model.CategoryInfo
@@ -399,7 +399,7 @@ abstract class AbsSlidingMusicPanelActivity : AbsMusicServiceActivity(),
             navigationBarColor = surfaceColor()
             setTaskDescColor(paletteColor)
             val isColorLight = paletteColor.isColorLight
-            if (nowPlayingScreen == Default || nowPlayingScreen == NowPlayingScreen.Rsound1) {
+            if (nowPlayingScreen == Default || nowPlayingScreen == NowPlayingScreen.Rsound2) {
                 animateNavigationBarColor(android.graphics.Color.BLACK)
                 navigationBarColor = android.graphics.Color.BLACK
                 setLightStatusBar(false)
@@ -529,8 +529,8 @@ abstract class AbsSlidingMusicPanelActivity : AbsMusicServiceActivity(),
     private fun chooseFragmentForTheme() {
         nowPlayingScreen = PreferenceUtil.nowPlayingScreen
 
-        val fragment: AbsPlayerFragment = if (nowPlayingScreen == NowPlayingScreen.Rsound1) {
-            Rsound1PlayerFragment()
+        val fragment: AbsPlayerFragment = if (nowPlayingScreen == NowPlayingScreen.Rsound2) {
+            Rsound2PlayerFragment()
         } else {
             BlurPlayerFragment()
         }
