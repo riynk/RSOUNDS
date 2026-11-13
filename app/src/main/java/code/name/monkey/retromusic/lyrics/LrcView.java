@@ -587,6 +587,7 @@ public class LrcView extends View {
             return;
         }
 
+        mLrcPaint.setTextSize(mCurrentTextSize);
         for (LrcEntry lrcEntry : mLrcEntryList) {
             lrcEntry.init(mLrcPaint, (int) getLrcWidth(), mTextGravity, mTranslationTextColor, mTranslationTextScale);
         }
