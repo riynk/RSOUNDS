@@ -265,6 +265,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == SHOW_LYRICS) updateLyricsButtonState()
+        if (key == "extra_song_info") updateSongHeader()
         if (key == NEW_BLUR_AMOUNT || key == "lyrics_background_source" || key == "lyrics_type") {
             updateBlur()
         }
