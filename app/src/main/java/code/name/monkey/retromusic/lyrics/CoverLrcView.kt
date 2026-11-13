@@ -90,6 +90,7 @@ class CoverLrcView @JvmOverloads constructor(
     }
 
     private val viewScope = CoroutineScope(Dispatchers.Main + Job())
+    var onLyricsLoaded: ((List<String>) -> Unit)? = null
 
     private val mSimpleOnGestureListener: SimpleOnGestureListener =
         object : SimpleOnGestureListener() {
@@ -500,6 +501,7 @@ class CoverLrcView @JvmOverloads constructor(
         mLrcEntryList.sort()
         initEntryList()
         invalidate()
+        onLyricsLoaded?.invoke(lyricTexts)
     }
 
     private fun initPlayDrawable() {
