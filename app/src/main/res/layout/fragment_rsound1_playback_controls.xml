@@ -170,13 +170,13 @@
             android:src="@drawable/ic_playlist_add" />
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/actionDetails"
+            android:id="@+id/actionLyrics"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="?attr/roundSelector"
-            android:contentDescription="@string/action_details"
+            android:contentDescription="@string/lyrics"
             android:padding="12dp"
-            android:src="@drawable/ic_info_outline" />
+            android:src="@drawable/sld_lyrics" />
     </LinearLayout>
 
     <FrameLayout
