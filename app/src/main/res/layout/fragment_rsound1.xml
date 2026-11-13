@@ -27,6 +27,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Keep the album-cover fragment full-screen, matching the Default theme. -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/playerAlbumCoverFragment"
+        android:name="code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout="@layout/fragment_player_album_cover" />
+
     <FrameLayout
         android:id="@+id/statusBarContainer"
         android:layout_width="match_parent"
@@ -104,17 +116,12 @@
             app:navigationIcon="@drawable/ic_keyboard_arrow_down" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/playerAlbumCoverFragment"
-        android:name="code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/playbackControlsFragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerContainer"
-        tools:layout="@layout/fragment_player_album_cover" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/playbackControlsGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.55" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/playbackControlsFragment"
@@ -124,7 +131,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/playerAlbumCoverFragment"
+        app:layout_constraintTop_toTopOf="@id/playbackControlsGuideline"
         tools:layout="@layout/fragment_rsound1_playback_controls" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
