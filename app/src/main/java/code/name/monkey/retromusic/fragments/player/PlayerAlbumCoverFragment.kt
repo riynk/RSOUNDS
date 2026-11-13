@@ -131,18 +131,36 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
 
     private fun translateCoverLyrics(songPath: String, lines: List<String>) {
         translationJob?.cancel()
-        if (!LyricsPreferences.translationVisible(requireContext()) || lines.isEmpty()) {
+        val context = context?.applicationContext ?: return
+        if (!LyricsPreferences.translationVisible(context) || lines.isEmpty()) {
             lrcView.clearTranslations()
             return
         }
-        val translated = LyricsPreferences.cachedTranslation(
-            requireContext(), lines.joinToString("\n"),
-            LyricsPreferences.translationLanguage(requireContext())
-        )?.lines().orEmpty()
-        if (songPath == MusicPlayerRemote.currentSong.data && _binding != null) {
-            lrcView.setTranslations(List(lines.size) { translated.getOrNull(it).orEmpty() })
-        } else {
-            lrcView.clearTranslations()
+
+        val sourceText = lines.joinToString("\n")
+        val targetLanguage = LyricsPreferences.translationLanguage(context)
+        val cached = LyricsPreferences.cachedTranslation(context, sourceText, targetLanguage)
+        if (cached != null) {
+            if (songPath == MusicPlayerRemote.currentSong.data && _binding != null) {
+                lrcView.setTranslations(List(lines.size) { cached.lines().getOrNull(it).orEmpty() })
+            }
+            return
+        }
+
+        // Generate a translation on cache miss, then attach it only to the track
+        // whose lyrics initiated this request.
+        lrcView.clearTranslations()
+        translationJob = viewLifecycleOwner.lifecycleScope.launch {
+            val translatedText = LyricsPreferences.translate(context, sourceText)
+            if (translatedText != null &&
+                songPath == MusicPlayerRemote.currentSong.data &&
+                _binding != null &&
+                LyricsPreferences.translationVisible(context) &&
+                LyricsPreferences.translationLanguage(context) == targetLanguage
+            ) {
+                val translatedLines = translatedText.lines()
+                lrcView.setTranslations(List(lines.size) { translatedLines.getOrNull(it).orEmpty() })
+            }
         }
     }
 
