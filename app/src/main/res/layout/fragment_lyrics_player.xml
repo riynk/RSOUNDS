@@ -92,6 +92,20 @@
         app:layout_constraintTop_toBottomOf="@id/statusBarContainer"
         app:navigationIcon="@drawable/ic_keyboard_arrow_down" />
 
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/lyricsFormat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="4dp"
+        android:text="LRC"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/playerAlbumCoverFragment"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/playerAlbumCoverFragment"
         android:name="code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment"
