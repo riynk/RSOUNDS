@@ -52,6 +52,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         _binding = FragmentCoverLyricsBinding.bind(view)
         progressViewUpdateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
         applyLyricStyle()
+        binding.root.isVisible = PreferenceUtil.showLyrics
         if (PreferenceUtil.showLyrics) {
             progressViewUpdateHelper?.start()
         }
