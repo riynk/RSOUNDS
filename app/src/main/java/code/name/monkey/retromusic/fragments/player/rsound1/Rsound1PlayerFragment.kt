@@ -86,8 +86,8 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
         controlsView.findViewById<View>(R.id.actionPlaylist)?.setOnClickListener {
             dispatchPlayerAction(R.id.action_add_to_playlist)
         }
-        controlsView.findViewById<View>(R.id.actionDetails)?.setOnClickListener {
-            dispatchPlayerAction(R.id.action_details)
+        controlsView.findViewById<View>(R.id.actionLyrics)?.setOnClickListener {
+            dispatchPlayerAction(R.id.action_toggle_lyrics)
         }
         updateFavoriteActionState()
         controlsView.findViewById<android.widget.ImageView>(R.id.actionFavorite)?.imageTintList =
@@ -96,9 +96,6 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
             (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
         }
         controlsView.findViewById<View>(R.id.actionPlaylist)?.let {
-            (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
-        }
-        controlsView.findViewById<View>(R.id.actionDetails)?.let {
             (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
         }
     }
@@ -142,11 +139,13 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
             }
             setOnMenuItemClickListener(this@Rsound1PlayerFragment)
             menu.findItem(R.id.action_sleep_timer)?.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
-            menu.findItem(R.id.action_toggle_lyrics)?.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+            menu.findItem(R.id.action_toggle_lyrics)?.apply {
+                isVisible = false
+                setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+            }
             menu.findItem(R.id.action_toggle_favorite)?.isVisible = false
             menu.findItem(R.id.now_playing)?.isVisible = false
             menu.findItem(R.id.action_add_to_playlist)?.isVisible = false
-            menu.findItem(R.id.action_details)?.isVisible = false
             ToolbarContentTintHelper.colorizeToolbar(this, Color.WHITE, requireActivity())
         }
         updateTranslationActionVisibility()
