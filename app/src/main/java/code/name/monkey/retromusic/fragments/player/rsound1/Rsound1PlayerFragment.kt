@@ -81,9 +81,8 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
             dispatchPlayerAction(R.id.action_details)
         }
         updateFavoriteActionState()
-        controlsView.findViewById<View>(R.id.actionFavorite)?.let { button ->
-            button.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
-        }
+        controlsView.findViewById<android.widget.ImageView>(R.id.actionFavorite)?.imageTintList =
+            android.content.res.ColorStateList.valueOf(Color.WHITE)
         controlsView.findViewById<View>(R.id.actionQueue)?.let {
             (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
         }
