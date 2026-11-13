@@ -19,6 +19,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import androidx.annotation.LayoutRes
 import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.preference.PreferenceManager
@@ -48,7 +49,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 
 
-class BlurPlayerFragment : AbsPlayerFragment(R.layout.fragment_blur),
+open class BlurPlayerFragment @JvmOverloads constructor(
+    @LayoutRes layout: Int = R.layout.fragment_blur
+) : AbsPlayerFragment(layout),
     SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var lastRequest: RequestBuilder<Drawable>? = null
