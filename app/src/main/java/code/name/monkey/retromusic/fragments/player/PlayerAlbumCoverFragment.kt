@@ -138,6 +138,7 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
                     return true
                 }
             })
+        binding.viewPager.isClickable = true
         binding.viewPager.setOnTouchListener { _, event ->
             artworkGestureDetector?.onTouchEvent(event)
             false
