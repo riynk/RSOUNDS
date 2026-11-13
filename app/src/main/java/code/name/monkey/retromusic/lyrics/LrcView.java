@@ -64,6 +64,8 @@ public class LrcView extends View {
     private int mNormalTextColor;
     private float mNormalTextSize;
     private int mCurrentTextColor;
+    private int mTranslationTextColor;
+    private float mTranslationTextScale = 0.86f;
     private float mCurrentTextSize;
     private int mTimelineTextColor;
     private int mTimelineColor;
@@ -221,6 +223,7 @@ public class LrcView extends View {
                 ta.getColor(
                         R.styleable.LrcView_lrcCurrentTextColor,
                         getResources().getColor(R.color.lrc_current_text_color));
+        mTranslationTextColor = mNormalTextColor;
         mTimelineTextColor =
                 ta.getColor(
                         R.styleable.LrcView_lrcTimelineTextColor,
@@ -280,6 +283,13 @@ public class LrcView extends View {
 
     public void setCurrentColor(int currentColor) {
         mCurrentTextColor = currentColor;
+        postInvalidate();
+    }
+
+    public void setTranslationStyle(int color, float scale) {
+        mTranslationTextColor = color;
+        mTranslationTextScale = Math.max(0.7f, Math.min(1f, scale));
+        initEntryList();
         postInvalidate();
     }
 
@@ -502,7 +512,7 @@ public class LrcView extends View {
                         ((mLrcEntryList.get(i - 1).getHeight() + mLrcEntryList.get(i).getHeight()) >> 1)
                                 + mDividerHeight;
             }
-            if (i <= mCurrentLine) {
+            if (i == mCurrentLine) {
                 mLrcPaint.setTextSize(mNormalTextSize);
                 mLrcPaint.setColor(mCurrentTextColor);
             } else {
@@ -578,7 +588,7 @@ public class LrcView extends View {
         }
 
         for (LrcEntry lrcEntry : mLrcEntryList) {
-            lrcEntry.init(mLrcPaint, (int) getLrcWidth(), mTextGravity);
+            lrcEntry.init(mLrcPaint, (int) getLrcWidth(), mTextGravity, mTranslationTextColor, mTranslationTextScale);
         }
 
         mOffset = getHeight() / 2F;
