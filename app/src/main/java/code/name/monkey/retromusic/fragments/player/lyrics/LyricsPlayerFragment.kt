@@ -151,7 +151,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         val blur = BlurTransformation.Builder(requireContext()).blurRadius(blurAmount.toFloat()).build()
         val metadataRequest = Glide.with(this).load(RetroGlideExtension.getSongModel(song))
             .simpleSongCoverOptions(song).transform(blur)
-        val source = if (PreferenceUtil.lyricsType == CoverLyricsType.OVER_COVER) LyricsPreferences.backgroundSource(requireContext()) else "metadata"
+        val source = LyricsPreferences.backgroundSource(requireContext())
         val artist = Artist(song.artistId, listOf(Album(song.albumId, listOf(song))))
         val request = if (source == "artist" || source == "auto") {
             Glide.with(this).load(RetroGlideExtension.getArtistModel(artist))
