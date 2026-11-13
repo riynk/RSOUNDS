@@ -18,6 +18,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.content.res.ColorStateList
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
@@ -33,6 +34,7 @@ import code.name.monkey.retromusic.SHOW_LYRICS
 import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentLyricsPlayerBinding
+import code.name.monkey.retromusic.extensions.getTintedDrawable
 import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
@@ -124,7 +126,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         }
     }
 
-    private fun updateFavoriteButtonState() {
+    private fun updateFavoriteButtonState(animate: Boolean = false) {
         val songId = MusicPlayerRemote.currentSong.id
         lifecycleScope.launch {
             val isFavorite = withContext(Dispatchers.IO) {
@@ -132,10 +134,14 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
             }
             if (_binding != null && MusicPlayerRemote.currentSong.id == songId) {
                 binding.favoriteButton.apply {
-                    setImageResource(
-                        if (isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border
-                    )
-                    imageTintList = ColorStateList.valueOf(toolbarIconColor())
+                    val icon = when {
+                        animate && isFavorite -> R.drawable.avd_favorite
+                        animate && !isFavorite -> R.drawable.avd_unfavorite
+                        isFavorite -> R.drawable.ic_favorite
+                        else -> R.drawable.ic_favorite_border
+                    }
+                    setImageDrawable(requireContext().getTintedDrawable(icon, toolbarIconColor()))
+                    (drawable as? AnimatedVectorDrawable)?.start()
                 }
             }
         }
@@ -155,7 +161,7 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
 
     override fun onFavoriteStateChanged() {
         super.onFavoriteStateChanged()
-        updateFavoriteButtonState()
+        updateFavoriteButtonState(animate = true)
     }
 
     override fun onColorChanged(color: MediaNotificationProcessor) {
