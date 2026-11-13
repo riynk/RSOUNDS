@@ -91,8 +91,9 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         // Reserve only the physical display-cutout inset so the header never moves or covers a notch.
         binding.statusBarContainer.findViewById<View>(R.id.status_bar)?.isVisible = false
         ViewCompat.setOnApplyWindowInsetsListener(binding.statusBarContainer) { container, insets ->
-            val cutoutTop = insets.getInsets(WindowInsetsCompat.Type.displayCutout()).top
-            container.updatePadding(top = cutoutTop)
+            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            container.updatePadding(top = cutout.top)
+            binding.root.updatePadding(left = cutout.left, right = cutout.right)
             insets
         }
         ViewCompat.requestApplyInsets(binding.statusBarContainer)
