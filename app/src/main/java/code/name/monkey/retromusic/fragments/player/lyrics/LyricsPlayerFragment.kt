@@ -34,9 +34,12 @@ import code.name.monkey.retromusic.SHOW_LYRICS
 import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentLyricsPlayerBinding
+import code.name.monkey.retromusic.extensions.getSongInfo
 import code.name.monkey.retromusic.extensions.getTintedDrawable
 import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
+import code.name.monkey.retromusic.fragments.base.goToAlbum
+import code.name.monkey.retromusic.fragments.base.goToArtist
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
 import code.name.monkey.retromusic.glide.BlurTransformation
 import code.name.monkey.retromusic.glide.RetroGlideExtension
@@ -82,6 +85,8 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         setUpPlayerToolbar()
         setUpBottomActions()
         updateSongHeader()
+        binding.title.setOnClickListener { goToAlbum(requireActivity()) }
+        binding.artist.setOnClickListener { goToArtist(requireActivity()) }
         ViewCompat.setOnApplyWindowInsetsListener(binding.statusBarContainer) { container, insets ->
             val safeTop = insets.getInsets(
                 WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout()
@@ -218,6 +223,10 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         binding.title.text = song.title
         binding.artist.text = song.artistName
         binding.album.text = song.albumName
+        binding.songInfoBottom.apply {
+            text = getSongInfo(song)
+            visibility = if (PreferenceUtil.isSongInfo) View.VISIBLE else View.GONE
+        }
     }
 
     override fun onServiceConnected() {
