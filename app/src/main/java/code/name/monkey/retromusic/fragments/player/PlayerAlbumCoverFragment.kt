@@ -41,7 +41,7 @@ import code.name.monkey.retromusic.databinding.FragmentPlayerAlbumCoverBinding
 import code.name.monkey.retromusic.extensions.isColorLight
 import code.name.monkey.retromusic.extensions.surfaceColor
 import code.name.monkey.retromusic.fragments.NowPlayingScreen.Default
-import code.name.monkey.retromusic.fragments.NowPlayingScreen.Lyrics
+import code.name.monkey.retromusic.fragments.NowPlayingScreen.Rsound1
 import code.name.monkey.retromusic.fragments.base.AbsMusicServiceFragment
 import code.name.monkey.retromusic.fragments.base.goToLyrics
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
@@ -393,5 +393,5 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
     }
 
     private val lyricViewNpsList =
-        listOf(Default, Lyrics)
+        listOf(Default, Rsound1)
 }
