@@ -4,6 +4,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import code.name.monkey.retromusic.R
 import kotlinx.coroutines.launch
@@ -29,13 +30,17 @@ object LyricsTranslationDialog {
             .show()
 
         fragment.viewLifecycleOwner.lifecycleScope.launch {
-            val translated = lines.map { line ->
-                if (line.isBlank()) "" else LyricsPreferences.translate(
-                    context, line, force = true
-                ).orEmpty()
-            }
-            if (!fragment.isAdded) return@launch
-            progress.dismiss()
+            try {
+                val translated = lines.map { line ->
+                    if (line.isBlank()) "" else LyricsPreferences.translate(
+                        context, line, force = true
+                    ).orEmpty()
+                }
+                if (!fragment.isAdded) {
+                    progress.dismiss()
+                    return@launch
+                }
+                progress.dismiss()
             if (translated.none { it.isNotBlank() }) {
                 MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.action_translate_lyrics)
@@ -60,6 +65,19 @@ object LyricsTranslationDialog {
                 .setView(scroll)
                 .setPositiveButton(android.R.string.ok, null)
                 .show()
+            } catch (cancelled: CancellationException) {
+                progress.dismiss()
+                throw cancelled
+            } catch (_: Exception) {
+                progress.dismiss()
+                if (fragment.isAdded) {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.action_translate_lyrics)
+                        .setMessage(R.string.lyrics_translation_failed)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
+            }
         }
     }
 }
