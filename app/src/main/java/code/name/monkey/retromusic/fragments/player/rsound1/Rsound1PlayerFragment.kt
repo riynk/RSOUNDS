@@ -3,6 +3,7 @@ package code.name.monkey.retromusic.fragments.player.rsound1
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.MenuItem
@@ -14,6 +15,7 @@ import code.name.monkey.retromusic.NEW_BLUR_AMOUNT
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentRsound1Binding
 import code.name.monkey.retromusic.extensions.drawAboveSystemBars
+import code.name.monkey.retromusic.extensions.getTintedDrawable
 import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
@@ -32,6 +34,10 @@ import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
     SharedPreferences.OnSharedPreferenceChangeListener {
@@ -74,6 +80,39 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
         controlsView.findViewById<View>(R.id.actionDetails)?.setOnClickListener {
             dispatchPlayerAction(R.id.action_details)
         }
+        updateFavoriteActionState()
+        controlsView.findViewById<View>(R.id.actionFavorite)?.let { button ->
+            button.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+        }
+        controlsView.findViewById<View>(R.id.actionQueue)?.let {
+            (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+        }
+        controlsView.findViewById<View>(R.id.actionPlaylist)?.let {
+            (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+        }
+        controlsView.findViewById<View>(R.id.actionDetails)?.let {
+            (it as? android.widget.ImageView)?.imageTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+        }
+    }
+
+    private fun updateFavoriteActionState(animate: Boolean = false) {
+        val songId = MusicPlayerRemote.currentSong.id
+        lifecycleScope.launch {
+            val favorite = withContext(Dispatchers.IO) {
+                libraryViewModel.isSongFavorite(songId)
+            }
+            val button = playbackControlsFragment.view?.findViewById<android.widget.ImageView>(R.id.actionFavorite)
+            if (button != null && MusicPlayerRemote.currentSong.id == songId) {
+                val icon = when {
+                    animate && favorite -> R.drawable.avd_favorite
+                    animate && !favorite -> R.drawable.avd_unfavorite
+                    favorite -> R.drawable.ic_favorite
+                    else -> R.drawable.ic_favorite_border
+                }
+                button.setImageDrawable(requireContext().getTintedDrawable(icon, Color.WHITE))
+                (button.drawable as? AnimatedVectorDrawable)?.start()
+            }
+        }
     }
 
     private fun dispatchPlayerAction(itemId: Int) {
@@ -114,6 +153,11 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
         toggleFavorite(MusicPlayerRemote.currentSong)
     }
 
+    override fun onFavoriteStateChanged() {
+        super.onFavoriteStateChanged()
+        updateFavoriteActionState(animate = true)
+    }
+
     override fun toggleFavorite(song: Song) {
         super.toggleFavorite(song)
         if (song.id == MusicPlayerRemote.currentSong.id) updateIsFavorite()
@@ -132,12 +176,14 @@ class Rsound1PlayerFragment : AbsPlayerFragment(R.layout.fragment_rsound1),
         super.onServiceConnected()
         updateSongMetadata()
         updateIsFavorite()
+        updateFavoriteActionState()
         updateBlur()
     }
 
     override fun onPlayingMetaChanged() {
         super.onPlayingMetaChanged()
         updateSongMetadata()
+        updateFavoriteActionState()
         updateBlur()
     }
 
