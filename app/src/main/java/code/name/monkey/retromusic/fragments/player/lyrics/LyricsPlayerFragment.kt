@@ -98,8 +98,22 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
                 WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout()
             )
             val cutout = insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.displayCutout())
-            container.updatePadding(top = stableTop.top)
-            binding.root.updatePadding(left = cutout.left, right = cutout.right)
+            container.updatePadding(
+                left = cutout.left,
+                top = stableTop.top,
+                right = cutout.right
+            )
+
+            // Keep the window background edge-to-edge. Apply landscape cutout
+            // protection only to the content panels, never to the root/background.
+            binding.root.findViewById<View>(R.id.artworkSquareContainer)?.updatePadding(
+                left = cutout.left,
+                right = 0
+            )
+            binding.root.findViewById<View>(R.id.rightPanel)?.updatePadding(
+                left = 0,
+                right = cutout.right
+            )
             insets
         }
         ViewCompat.requestApplyInsets(binding.statusBarContainer)
