@@ -8,6 +8,7 @@ import code.name.monkey.retromusic.model.Song
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -64,6 +65,42 @@ object LyricsPreferences {
             val target = translationLanguage(context)
             if ((!translationEnabled(context) && !force) || text.isBlank()) return@withContext null
             cachedTranslation(context, text, target)?.let { return@withContext it }
+
+            // Google Translate's lightweight web endpoint is a first fallback because
+            // public LibreTranslate mirrors frequently require keys or rate-limit clients.
+            var googleConnection: HttpURLConnection? = null
+            try {
+                val encodedText = URLEncoder.encode(text, Charsets.UTF_8.name())
+                val googleUrl = URL(
+                    "https://translate.googleapis.com/translate_a/single?client=gtx&sl=$source&tl=$target&dt=t&q=$encodedText"
+                )
+                googleConnection = (googleUrl.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 8000
+                    readTimeout = 12000
+                    setRequestProperty("Accept", "application/json")
+                }
+                if (googleConnection.responseCode in 200..299) {
+                    val response = JSONArray(googleConnection.inputStream.bufferedReader().use { it.readText() })
+                    val segments = response.optJSONArray(0)
+                    val translated = buildString {
+                        if (segments != null) {
+                            for (index in 0 until segments.length()) {
+                                append(segments.optJSONArray(index)?.optString(0).orEmpty())
+                            }
+                        }
+                    }.takeIf { it.isNotBlank() }
+                    if (translated != null) {
+                        saveTranslation(context, text, target, translated)
+                        return@withContext translated
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Log.w("LyricsTranslation", "Google translation request failed", error)
+            } finally {
+                googleConnection?.disconnect()
+            }
 
             // Public mirrors can be temporarily unavailable or rate-limited. Try another
             // documented mirror instead of silently giving up after the first failure.
