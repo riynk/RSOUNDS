@@ -75,6 +75,7 @@ class CoverLrcView @JvmOverloads constructor(
     private var mScroller: Scroller? = null
     private var mOffset = 0f
     private var mCurrentLine = 0
+    private var loadGeneration = 0
     private var isShowTimeline = false
     private var isTouching = false
     private var isFling = false
@@ -308,10 +309,11 @@ class CoverLrcView @JvmOverloads constructor(
     fun loadLrc(lrcFile: File) {
         runOnUi {
             reset()
+            val generation = ++loadGeneration
             viewScope.launch(Dispatchers.IO) {
                 val lrcEntries = LrcUtils.parseLrc(arrayOf(lrcFile, null))
                 withContext(Dispatchers.Main) {
-                    onLrcLoaded(lrcEntries)
+                    if (generation == loadGeneration) onLrcLoaded(lrcEntries)
                 }
             }
         }
@@ -320,10 +322,11 @@ class CoverLrcView @JvmOverloads constructor(
     fun loadLrc(lrcText: String?) {
         runOnUi {
             reset()
+            val generation = ++loadGeneration
             viewScope.launch(Dispatchers.IO) {
                 val lrcEntries = LrcUtils.parseLrc(arrayOf(lrcText, null))
                 withContext(Dispatchers.Main) {
-                    onLrcLoaded(lrcEntries)
+                    if (generation == loadGeneration) onLrcLoaded(lrcEntries)
                 }
             }
         }
@@ -523,6 +526,7 @@ class CoverLrcView @JvmOverloads constructor(
     }
 
     fun reset() {
+        loadGeneration++
         endAnimation()
         mScroller!!.forceFinished(true)
         isShowTimeline = false
