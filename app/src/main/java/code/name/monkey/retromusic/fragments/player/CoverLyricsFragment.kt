@@ -44,6 +44,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     private val lyricsTranslation: TextView get() = binding.playerLyricsTranslation
 
     private var lyrics: Lyrics? = null
+    private var translationOnly = false
     private var translationJob: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -59,6 +60,16 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         }
     }
 
+    fun setTranslationOnly(enabled: Boolean) {
+        translationOnly = enabled
+        if (_binding != null) {
+            binding.playerLyricsLine1.isVisible = !enabled && binding.playerLyricsLine1.text.isNotEmpty()
+            binding.playerLyricsLine2.isVisible = !enabled && binding.playerLyricsLine2.text.isNotEmpty()
+            binding.playerLyrics.background = if (enabled) null else requireContext().getDrawable(R.drawable.lyrics_mask)
+            binding.playerLyricsTranslation.translationY = if (enabled) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 56f, resources.displayMetrics) else 0f
+        }
+    }
+
     fun setColors(color: MediaNotificationProcessor) {
         val attributes = requireContext().obtainStyledAttributes(intArrayOf(android.R.attr.textColorPrimary))
         val defaultTextColor = attributes.getColor(0, 0xFF000000.toInt())
@@ -70,7 +81,6 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             playerLyricsLine2.setTextColor(defaultTextColor)
             playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
             lyricsTranslation.setTextColor(defaultTextColor)
-            lyricsPreviousTranslation.setTextColor(defaultTextColor)
         }
     }
 
@@ -194,8 +204,8 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             lyricsLine2.text = line
             updateCurrentTranslation(line)
 
-            lyricsLine1.isVisible = true
-            lyricsLine2.isVisible = true
+            lyricsLine1.isVisible = !translationOnly
+            lyricsLine2.isVisible = !translationOnly
 
             lyricsLine2.measure(
                 View.MeasureSpec.makeMeasureSpec(
@@ -231,8 +241,6 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
                 lyricsLine2.text = null
                 lyricsTranslation.text = null
                 lyricsTranslation.isVisible = false
-                lyricsPreviousTranslation.text = null
-                lyricsPreviousTranslation.isVisible = false
             }
     }
 
@@ -248,7 +256,6 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
             .unregisterOnSharedPreferenceChangeListener(this)
         progressViewUpdateHelper?.stop()
         translationJob?.cancel()
-        previousTranslationJob?.cancel()
         _binding = null
     }
 }
