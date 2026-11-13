@@ -85,7 +85,7 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
         attributes.recycle()
         binding.run {
             playerLyrics.background = null
-            playerLyricsLine1.setTextColor(primaryTextColor)
+            playerLyricsLine1.setTextColor(secondaryTextColor)
             playerLyricsLine1.setShadowLayer(0f, 0f, 0f, 0)
             playerLyricsLine2.setTextColor(primaryTextColor)
             playerLyricsLine2.setShadowLayer(0f, 0f, 0f, 0)
