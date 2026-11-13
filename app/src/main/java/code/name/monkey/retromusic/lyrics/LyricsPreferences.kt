@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import code.name.monkey.retromusic.model.Song
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -97,6 +98,8 @@ object LyricsPreferences {
                         return@withContext result
                     }
                     Log.w("LyricsTranslation", "Empty translation response from $endpoint")
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
                 } catch (error: Exception) {
                     Log.w("LyricsTranslation", "Translation request failed: $endpoint", error)
                 } finally {
