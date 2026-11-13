@@ -13,6 +13,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.security.MessageDigest
 
 /** Persistent lyric presentation, per-track synchronization and translation cache. */
 object LyricsPreferences {
@@ -49,14 +50,18 @@ object LyricsPreferences {
         prefs(context).edit { putFloat(scaleKey(song), scale.coerceIn(0.8f, 1.2f)) }
     }
 
-    private fun cacheKey(text: String, target: String) =
-        CACHE_PREFIX + (text.trim() + "|" + target).hashCode().toUInt().toString(16)
+    private fun cacheKey(text: String, source: String, target: String): String {
+        val input = "$source|$target|${text.trim()}".toByteArray(Charsets.UTF_8)
+        val digest = MessageDigest.getInstance("SHA-256").digest(input)
+        val fingerprint = digest.take(16).joinToString("") { "%02x".format(it) }
+        return CACHE_PREFIX + fingerprint
+    }
 
-    fun cachedTranslation(context: Context, text: String, target: String): String? =
-        prefs(context).getString(cacheKey(text, target), null)
+    fun cachedTranslation(context: Context, text: String, target: String, source: String = "auto"): String? =
+        prefs(context).getString(cacheKey(text, source, target), null)
 
-    fun saveTranslation(context: Context, text: String, target: String, translated: String) {
-        prefs(context).edit { putString(cacheKey(text, target), translated) }
+    fun saveTranslation(context: Context, text: String, target: String, translated: String, source: String = "auto") {
+        prefs(context).edit { putString(cacheKey(text, source, target), translated) }
     }
 
     /** Translates long lyrics in bounded chunks so public endpoints do not reject oversized requests. */
@@ -64,19 +69,19 @@ object LyricsPreferences {
         withContext(Dispatchers.IO) {
             val target = translationLanguage(context)
             if ((!translationEnabled(context) && !force) || text.isBlank()) return@withContext null
-            cachedTranslation(context, text, target)?.let { return@withContext it }
+            cachedTranslation(context, text, target, source)?.let { return@withContext it }
 
-            val chunks = splitForTranslation(text, 900)
+            val chunks = splitForTranslation(text, 1800)
             val translatedChunks = ArrayList<String>(chunks.size)
             for (chunk in chunks) {
-                val translated = cachedTranslation(context, chunk, target)
+                val translated = cachedTranslation(context, chunk, target, source)
                     ?: translateChunk(chunk, source, target)
                     ?: return@withContext null
-                saveTranslation(context, chunk, target, translated)
+                saveTranslation(context, chunk, target, translated, source)
                 translatedChunks += translated
             }
             translatedChunks.joinToString("\n").also {
-                if (it.isNotBlank()) saveTranslation(context, text, target, it)
+                if (it.isNotBlank()) saveTranslation(context, text, target, it, source)
             }
         }
 
@@ -89,7 +94,13 @@ object LyricsPreferences {
                     result += current.toString()
                     current.setLength(0)
                 }
-                line.chunked(maxLength).forEach { result += it }
+                var remaining = line
+                while (remaining.length > maxLength) {
+                    val splitAt = remaining.lastIndexOf(' ', maxLength).takeIf { it > maxLength / 2 } ?: maxLength
+                    result += remaining.substring(0, splitAt).trim()
+                    remaining = remaining.substring(splitAt).trimStart()
+                }
+                if (remaining.isNotEmpty()) result += remaining
             } else if (current.isNotEmpty() && current.length + line.length + 1 > maxLength) {
                 result += current.toString()
                 current.setLength(0)
