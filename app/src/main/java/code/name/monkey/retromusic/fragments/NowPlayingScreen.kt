@@ -29,4 +29,5 @@ enum class NowPlayingScreen constructor(
 
     Default(R.string.now_playing_default, R.drawable.np_blur, 4, AlbumCoverStyle.Normal),
     Lyrics(R.string.now_playing_lyrics, R.drawable.np_blur, 5, AlbumCoverStyle.Normal),
+    Rsound1(R.string.now_playing_rsound1, R.drawable.np_blur, 6, AlbumCoverStyle.Normal),
 }
