@@ -166,7 +166,6 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
             false
         }
         progressViewUpdateHelper = MusicProgressViewUpdateHelper(this, 500, 1000)
-        maybeInitLyrics()
         lrcView.apply {
             setDraggable(true) { time ->
                 MusicPlayerRemote.seekTo(time.toInt())
@@ -177,6 +176,10 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
                 goToLyrics(requireActivity())
             }
         }
+        if (lrcView.hasLrc()) {
+            translateCoverLyrics(MusicPlayerRemote.currentSong.data, lrcView.lyricTexts)
+        }
+        maybeInitLyrics()
     }
 
     private fun setupViewPager() {
