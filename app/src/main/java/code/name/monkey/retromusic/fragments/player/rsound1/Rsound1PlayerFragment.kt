@@ -29,7 +29,7 @@ import code.name.monkey.retromusic.model.Album
 import code.name.monkey.retromusic.model.Artist
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.CoverLyricsType
-import code.name.monkey.retromusic.util.LyricsPreferences
+import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import com.bumptech.glide.Glide
