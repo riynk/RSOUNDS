@@ -16,11 +16,16 @@ package code.name.monkey.retromusic.fragments.player.lyrics
 
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.content.res.ColorStateList
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import code.name.monkey.appthemehelper.util.ToolbarContentTintHelper
 import code.name.monkey.retromusic.NEW_BLUR_AMOUNT
@@ -28,7 +33,6 @@ import code.name.monkey.retromusic.SHOW_LYRICS
 import code.name.monkey.retromusic.lyrics.LyricsPreferences
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentLyricsPlayerBinding
-import code.name.monkey.retromusic.extensions.drawAboveSystemBars
 import code.name.monkey.retromusic.extensions.whichFragment
 import code.name.monkey.retromusic.fragments.base.AbsPlayerFragment
 import code.name.monkey.retromusic.fragments.player.PlayerAlbumCoverFragment
@@ -47,6 +51,9 @@ import code.name.monkey.retromusic.util.PreferenceUtil.blurAmount
 import code.name.monkey.retromusic.util.color.MediaNotificationProcessor
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
@@ -73,7 +80,14 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         setUpPlayerToolbar()
         setUpBottomActions()
         updateSongHeader()
-        binding.playerToolbar.drawAboveSystemBars()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.statusBarContainer) { container, insets ->
+            val safeTop = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.displayCutout()
+            ).top
+            container.updatePadding(top = safeTop)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.statusBarContainer)
     }
 
     private fun setUpSubFragments() {
@@ -95,15 +109,36 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
         binding.favoriteButton.setOnClickListener {
             toggleFavorite(MusicPlayerRemote.currentSong)
         }
+        updateFavoriteButtonState()
         binding.queueButton.setOnClickListener {
             openPlayingQueueAction()
         }
     }
 
     private fun updateLyricsButtonState() {
-        binding.lyricsButton.setImageResource(
-            if (PreferenceUtil.showLyrics) R.drawable.ic_lyrics else R.drawable.ic_lyrics_outline
-        )
+        binding.lyricsButton.apply {
+            setImageResource(
+                if (PreferenceUtil.showLyrics) R.drawable.ic_lyrics else R.drawable.ic_lyrics_outline
+            )
+            imageTintList = ColorStateList.valueOf(toolbarIconColor())
+        }
+    }
+
+    private fun updateFavoriteButtonState() {
+        val songId = MusicPlayerRemote.currentSong.id
+        lifecycleScope.launch {
+            val isFavorite = withContext(Dispatchers.IO) {
+                libraryViewModel.isSongFavorite(songId)
+            }
+            if (_binding != null && MusicPlayerRemote.currentSong.id == songId) {
+                binding.favoriteButton.apply {
+                    setImageResource(
+                        if (isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border
+                    )
+                    imageTintList = ColorStateList.valueOf(toolbarIconColor())
+                }
+            }
+        }
     }
 
     private fun setUpPlayerToolbar() {
@@ -116,6 +151,11 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
 
     override fun onFavoriteToggled() {
         toggleFavorite(MusicPlayerRemote.currentSong)
+    }
+
+    override fun onFavoriteStateChanged() {
+        super.onFavoriteStateChanged()
+        updateFavoriteButtonState()
     }
 
     override fun onColorChanged(color: MediaNotificationProcessor) {
@@ -176,12 +216,15 @@ class LyricsPlayerFragment : AbsPlayerFragment(R.layout.fragment_lyrics_player),
 
     override fun onServiceConnected() {
         updateIsFavorite()
+        updateFavoriteButtonState()
+        updateLyricsButtonState()
         updateBlur()
         updateSongHeader()
     }
 
     override fun onPlayingMetaChanged() {
         updateIsFavorite()
+        updateFavoriteButtonState()
         updateBlur()
         updateSongHeader()
     }
