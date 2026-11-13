@@ -31,40 +31,40 @@ object LyricsTranslationDialog {
 
         fragment.viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val translated = lines.map { line ->
-                    if (line.isBlank()) "" else LyricsPreferences.translate(
-                        context, line, force = true
-                    ).orEmpty()
-                }
+                // Translate the complete lyric in one request to avoid mirror rate limits.
+                val sourceText = lines.joinToString("\n").trim()
+                val translatedText = LyricsPreferences.translate(
+                    context, sourceText, force = true
+                ).orEmpty()
+
                 if (!fragment.isAdded) {
                     progress.dismiss()
                     return@launch
                 }
                 progress.dismiss()
-            if (translated.none { it.isNotBlank() }) {
+                if (translatedText.isBlank()) {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle(R.string.action_translate_lyrics)
+                        .setMessage(R.string.lyrics_translation_failed)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                    return@launch
+                }
+
+                val text = TextView(context).apply {
+                    setPadding(24, 16, 24, 16)
+                    textSize = 16f
+                    this.text = sourceText + "\n\n──────────\n\n" + translatedText
+                }
+                val scroll = ScrollView(context).apply {
+                    addView(text)
+                }
                 MaterialAlertDialogBuilder(context)
-                    .setTitle(R.string.action_translate_lyrics)
-                    .setMessage(R.string.lyrics_translation_failed)
+                    .setTitle(context.getString(R.string.action_translate_lyrics) + " · " +
+                        LyricsPreferences.translationLanguage(context).uppercase())
+                    .setView(scroll)
                     .setPositiveButton(android.R.string.ok, null)
                     .show()
-                return@launch
-            }
-            val text = TextView(context).apply {
-                setPadding(24, 16, 24, 16)
-                textSize = 16f
-                this.text = lines.mapIndexed { index, line ->
-                    if (line.isBlank()) "" else line + "\n" + translated[index]
-                }.joinToString("\n\n")
-            }
-            val scroll = ScrollView(context).apply {
-                addView(text)
-            }
-            MaterialAlertDialogBuilder(context)
-                .setTitle(context.getString(R.string.action_translate_lyrics) + " · " +
-                    LyricsPreferences.translationLanguage(context).uppercase())
-                .setView(scroll)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
             } catch (cancelled: CancellationException) {
                 progress.dismiss()
                 throw cancelled
