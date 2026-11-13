@@ -171,8 +171,9 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
     }
 
     private fun setupLyricsView() {
-        val primaryTextColor = resolveThemeColor(android.R.attr.textColorPrimary, 0xFFFFFFFF.toInt())
-        val secondaryTextColor = resolveThemeColor(android.R.attr.textColorSecondary, 0xFFB0B0B0.toInt())
+        // Lyrics use a fixed neutral contrast: current line white, inactive lines visibly dimmed.
+        val primaryTextColor = Color.WHITE
+        val secondaryTextColor = Color.argb(112, 255, 255, 255)
         binding.lyricsView.apply {
             setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
             setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
@@ -205,12 +206,17 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         if (translationSongPath == song.data) return
         translationSongPath = song.data
         val lines = binding.lyricsView.lyricTexts
+        val targetLanguage = LyricsPreferences.translationLanguage(requireContext())
         val translatedLines = LyricsPreferences.cachedTranslation(
-            requireContext(), lines.joinToString("\n"),
-            LyricsPreferences.translationLanguage(requireContext())
+            requireContext(), lines.joinToString("\n"), targetLanguage
         )?.lines().orEmpty()
+        // The player and lyrics page may load equivalent lyrics from different sources.
+        // Fall back to per-line cache entries so translations remain visible across both.
         binding.lyricsView.setTranslations(
-            List(lines.size) { index -> translatedLines.getOrNull(index).orEmpty() }
+            lines.mapIndexed { index, line ->
+                translatedLines.getOrNull(index)?.takeIf { it.isNotBlank() }
+                    ?: LyricsPreferences.cachedTranslation(requireContext(), line, targetLanguage).orEmpty()
+            }
         )
     }
 
@@ -457,15 +463,21 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         translationJob?.cancel()
         translationSongPath = null
         if (LyricsPreferences.translationVisible(requireContext()) && !lyrics.isNullOrBlank()) {
+            val targetLanguage = LyricsPreferences.translationLanguage(requireContext())
+            val sourceLines = lyrics.lines()
             val translatedLines = LyricsPreferences.cachedTranslation(
-                requireContext(), lyrics, LyricsPreferences.translationLanguage(requireContext())
+                requireContext(), lyrics, targetLanguage
             )?.lines().orEmpty()
-            if (translatedLines.any { it.isNotBlank() }) {
+            val lineTranslations = sourceLines.mapIndexed { index, line ->
+                translatedLines.getOrNull(index)?.takeIf { it.isNotBlank() }
+                    ?: LyricsPreferences.cachedTranslation(requireContext(), line, targetLanguage).orEmpty()
+            }
+            if (lineTranslations.any { it.isNotBlank() }) {
                 val rendered = SpannableStringBuilder()
-                lyrics.lines().forEachIndexed { index, line ->
+                sourceLines.forEachIndexed { index, line ->
                     if (index > 0) rendered.append("\n\n")
                     rendered.append(line)
-                    val translated = translatedLines.getOrNull(index).orEmpty()
+                    val translated = lineTranslations.getOrNull(index).orEmpty()
                     if (translated.isNotBlank()) {
                         rendered.append("\n")
                         val start = rendered.length
