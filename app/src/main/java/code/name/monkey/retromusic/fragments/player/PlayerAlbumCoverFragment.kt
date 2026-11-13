@@ -249,19 +249,22 @@ class PlayerAlbumCoverFragment : AbsMusicServiceFragment(R.layout.fragment_playe
         binding.lyricsView.isVisible = false
 
         if (replaceCover) {
-            // Keep the artwork visible during the fade, then remove it from hit testing
-            // so the replacement lyrics view receives gestures and taps.
+            // Fade the artwork out before removing it from hit testing, so the lyrics
+            // view receives touch events once it has replaced the cover.
             binding.viewPager.isVisible = true
+            binding.viewPager.alpha = if (visible) 1f else 0f
             ObjectAnimator.ofFloat(viewPager, View.ALPHA, if (visible) 0F else 1F).apply {
                 doOnEnd { binding.viewPager.isVisible = !visible }
                 start()
             }
         } else {
             binding.viewPager.isVisible = true
-            ObjectAnimator.ofFloat(viewPager, View.ALPHA, 1F).start()
+            binding.viewPager.alpha = 1f
         }
 
         val lyrics: View = if (replaceCover) lrcView else binding.coverLyrics
+        lyrics.alpha = if (visible) 0f else 1f
+        lyrics.isVisible = true
         ObjectAnimator.ofFloat(lyrics, View.ALPHA, if (visible) 1F else 0F).apply {
             doOnEnd { lyrics.isVisible = visible }
             start()
