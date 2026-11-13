@@ -159,13 +159,19 @@ class LyricsFragment : AbsMainActivityFragment(R.layout.fragment_lyrics),
         request.into(binding.lyricsBackground)
     }
 
+    private fun resolveThemeColor(attribute: Int, fallback: Int): Int {
+        val value = TypedValue()
+        if (!requireContext().theme.resolveAttribute(attribute, value, true)) return fallback
+        return if (value.resourceId != 0) {
+            androidx.core.content.ContextCompat.getColor(requireContext(), value.resourceId)
+        } else {
+            value.data
+        }
+    }
+
     private fun setupLyricsView() {
-        val attributes = requireContext().obtainStyledAttributes(
-            intArrayOf(android.R.attr.textColorPrimary, android.R.attr.textColorSecondary)
-        )
-        val primaryTextColor = attributes.getColor(0, 0xFF000000.toInt())
-        val secondaryTextColor = attributes.getColor(1, 0xFF777777.toInt())
-        attributes.recycle()
+        val primaryTextColor = resolveThemeColor(android.R.attr.textColorPrimary, 0xFFFFFFFF.toInt())
+        val secondaryTextColor = resolveThemeColor(android.R.attr.textColorSecondary, 0xFFB0B0B0.toInt())
         binding.lyricsView.apply {
             setLyricStyle(LyricsPreferences.fontScale(requireContext()), LyricsPreferences.lineSpacing(requireContext()))
             setTimeOffsetMs(LyricsPreferences.offset(requireContext(), song))
