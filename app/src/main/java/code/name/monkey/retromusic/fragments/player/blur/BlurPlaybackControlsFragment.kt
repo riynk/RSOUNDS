@@ -18,7 +18,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.LayoutRes
-import androidx.constraintlayout.widget.ConstraintSet
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageButton
 import android.widget.TextView
@@ -30,9 +29,7 @@ import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.databinding.FragmentBlurPlayerPlaybackControlsBinding
 import code.name.monkey.retromusic.extensions.applyColor
 import code.name.monkey.retromusic.extensions.getSongInfo
-import code.name.monkey.retromusic.extensions.hide
 import code.name.monkey.retromusic.extensions.show
-import code.name.monkey.retromusic.fragments.NowPlayingScreen.Lyrics
 import code.name.monkey.retromusic.fragments.base.AbsPlayerControlsFragment
 import code.name.monkey.retromusic.fragments.base.goToAlbum
 import code.name.monkey.retromusic.fragments.base.goToArtist
@@ -100,35 +97,9 @@ open class BlurPlaybackControlsFragment(
         val formattedArtistName = ArtistSeparator.split(song.artistName).joinToString(", ")
         binding.text.text = String.format("%s • %s", formattedArtistName, song.albumName)
 
-        if (PreferenceUtil.nowPlayingScreen == Lyrics) {
-            binding.title.hide()
-            binding.text.hide()
-            binding.songInfo.hide()
-            ConstraintSet().apply {
-                clone(binding.root)
-                clear(R.id.playPauseButton, ConstraintSet.BOTTOM)
-                connect(
-                    R.id.playPauseButton,
-                    ConstraintSet.TOP,
-                    R.id.progressSlider,
-                    ConstraintSet.BOTTOM,
-                    (16 * resources.displayMetrics.density).toInt()
-                )
-                clear(R.id.volumeFragmentContainer, ConstraintSet.BOTTOM)
-                connect(
-                    R.id.volumeFragmentContainer,
-                    ConstraintSet.TOP,
-                    R.id.playPauseButton,
-                    ConstraintSet.BOTTOM,
-                    (8 * resources.displayMetrics.density).toInt()
-                )
-                applyTo(binding.root)
-            }
-        } else {
-            binding.title.show()
-            binding.text.show()
-        }
-        if (PreferenceUtil.isSongInfo && PreferenceUtil.nowPlayingScreen != Lyrics) {
+        binding.title.show()
+        binding.text.show()
+        if (PreferenceUtil.isSongInfo) {
             binding.songInfo.show()
             binding.songInfo.text = getSongInfo(song)
         } else {
