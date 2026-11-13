@@ -157,6 +157,9 @@ class CoverLyricsFragment : AbsMusicServiceFragment(R.layout.fragment_cover_lyri
     }
 
     private fun updateCurrentTranslation(line: String) {
+        // Never leave the previous line's translation visible while the next one is loading.
+        lyricsTranslation.text = null
+        lyricsTranslation.isVisible = false
         if (!LyricsPreferences.translationEnabled(requireContext()) || line.isBlank()) {
             lyricsTranslation.text = null
             lyricsTranslation.isVisible = false
