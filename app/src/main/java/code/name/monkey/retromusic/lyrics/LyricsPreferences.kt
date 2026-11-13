@@ -59,90 +59,120 @@ object LyricsPreferences {
         prefs(context).edit { putString(cacheKey(text, target), translated) }
     }
 
-    /** Uses public LibreTranslate-compatible mirrors; callers must invoke off the main thread. */
+    /** Translates long lyrics in bounded chunks so public endpoints do not reject oversized requests. */
     suspend fun translate(context: Context, text: String, source: String = "auto", force: Boolean = false): String? =
         withContext(Dispatchers.IO) {
             val target = translationLanguage(context)
             if ((!translationEnabled(context) && !force) || text.isBlank()) return@withContext null
             cachedTranslation(context, text, target)?.let { return@withContext it }
 
-            // Google Translate's lightweight web endpoint is a first fallback because
-            // public LibreTranslate mirrors frequently require keys or rate-limit clients.
-            var googleConnection: HttpURLConnection? = null
-            try {
-                val encodedText = URLEncoder.encode(text, Charsets.UTF_8.name())
-                val googleUrl = URL(
-                    "https://translate.googleapis.com/translate_a/single?client=gtx&sl=$source&tl=$target&dt=t&q=$encodedText"
-                )
-                googleConnection = (googleUrl.openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 8000
-                    readTimeout = 12000
-                    setRequestProperty("Accept", "application/json")
+            val chunks = splitForTranslation(text, 900)
+            val translatedChunks = ArrayList<String>(chunks.size)
+            for (chunk in chunks) {
+                val translated = cachedTranslation(context, chunk, target)
+                    ?: translateChunk(chunk, source, target)
+                    ?: return@withContext null
+                saveTranslation(context, chunk, target, translated)
+                translatedChunks += translated
+            }
+            translatedChunks.joinToString("\n").also {
+                if (it.isNotBlank()) saveTranslation(context, text, target, it)
+            }
+        }
+
+    private fun splitForTranslation(text: String, maxLength: Int): List<String> {
+        val result = ArrayList<String>()
+        val current = StringBuilder()
+        for (line in text.lines()) {
+            if (line.length > maxLength) {
+                if (current.isNotEmpty()) {
+                    result += current.toString()
+                    current.setLength(0)
                 }
-                if (googleConnection.responseCode in 200..299) {
-                    val response = JSONArray(googleConnection.inputStream.bufferedReader().use { it.readText() })
-                    val segments = response.optJSONArray(0)
-                    val translated = buildString {
-                        if (segments != null) {
-                            for (index in 0 until segments.length()) {
-                                append(segments.optJSONArray(index)?.optString(0).orEmpty())
-                            }
+                line.chunked(maxLength).forEach { result += it }
+            } else if (current.isNotEmpty() && current.length + line.length + 1 > maxLength) {
+                result += current.toString()
+                current.setLength(0)
+                current.append(line)
+            } else {
+                if (current.isNotEmpty()) current.append('\n')
+                current.append(line)
+            }
+        }
+        if (current.isNotEmpty()) result += current.toString()
+        return result
+    }
+
+    private fun translateChunk(text: String, source: String, target: String): String? {
+        var googleConnection: HttpURLConnection? = null
+        try {
+            val encodedText = URLEncoder.encode(text, Charsets.UTF_8.name())
+            val googleUrl = URL(
+                "https://translate.googleapis.com/translate_a/single?client=gtx&sl=$source&tl=$target&dt=t&q=$encodedText"
+            )
+            googleConnection = (googleUrl.openConnection() as HttpURLConnection).apply {
+                connectTimeout = 10000
+                readTimeout = 15000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("User-Agent", "Mozilla/5.0")
+            }
+            if (googleConnection.responseCode in 200..299) {
+                val response = JSONArray(googleConnection.inputStream.bufferedReader().use { it.readText() })
+                val segments = response.optJSONArray(0)
+                val translated = buildString {
+                    if (segments != null) {
+                        for (index in 0 until segments.length()) {
+                            append(segments.optJSONArray(index)?.optString(0).orEmpty())
                         }
-                    }.takeIf { it.isNotBlank() }
-                    if (translated != null) {
-                        saveTranslation(context, text, target, translated)
-                        return@withContext translated
                     }
+                }.takeIf { it.isNotBlank() }
+                if (translated != null) return translated
+            } else {
+                Log.w("LyricsTranslation", "Google translation failed (${googleConnection.responseCode})")
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            Log.w("LyricsTranslation", "Google translation request failed", error)
+        } finally {
+            googleConnection?.disconnect()
+        }
+
+        val body = JSONObject().put("q", text).put("source", source)
+            .put("target", target).put("format", "text").toString()
+        for (endpoint in listOf(
+            "https://libretranslate.de/translate",
+            "https://translate.argosopentech.com/translate",
+            "https://trans.zillyhuhn.com/translate"
+        )) {
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    connectTimeout = 10000
+                    readTimeout = 15000
+                    doOutput = true
+                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
+                    setRequestProperty("Accept", "application/json")
+                    setRequestProperty("User-Agent", "Rsounds")
                 }
+                connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                if (connection.responseCode !in 200..299) {
+                    Log.w("LyricsTranslation", "Translation endpoint failed: $endpoint (${connection.responseCode})")
+                    continue
+                }
+                val result = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+                    .optString("translatedText").takeIf { it.isNotBlank() }
+                if (result != null) return result
+                Log.w("LyricsTranslation", "Empty translation response from $endpoint")
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
-                Log.w("LyricsTranslation", "Google translation request failed", error)
+                Log.w("LyricsTranslation", "Translation request failed: $endpoint", error)
             } finally {
-                googleConnection?.disconnect()
+                connection?.disconnect()
             }
-
-            // Public mirrors can be temporarily unavailable or rate-limited. Try another
-            // documented mirror instead of silently giving up after the first failure.
-            val endpoints = listOf(
-                "https://libretranslate.de/translate",
-                "https://translate.argosopentech.com/translate",
-                "https://trans.zillyhuhn.com/translate"
-            )
-            val body = JSONObject().put("q", text).put("source", source)
-                .put("target", target).put("format", "text").toString()
-
-            for (endpoint in endpoints) {
-                var connection: HttpURLConnection? = null
-                try {
-                    connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
-                        requestMethod = "POST"
-                        connectTimeout = 8000
-                        readTimeout = 12000
-                        doOutput = true
-                        setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                        setRequestProperty("Accept", "application/json")
-                    }
-                    connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-                    if (connection.responseCode !in 200..299) {
-                        Log.w("LyricsTranslation", "Translation endpoint failed: $endpoint (${connection.responseCode})")
-                        continue
-                    }
-                    val result = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
-                        .optString("translatedText").takeIf { it.isNotBlank() }
-                    if (result != null) {
-                        saveTranslation(context, text, target, result)
-                        return@withContext result
-                    }
-                    Log.w("LyricsTranslation", "Empty translation response from $endpoint")
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (error: Exception) {
-                    Log.w("LyricsTranslation", "Translation request failed: $endpoint", error)
-                } finally {
-                    connection?.disconnect()
-                }
-            }
-            null
         }
+        return null
+    }
 }
