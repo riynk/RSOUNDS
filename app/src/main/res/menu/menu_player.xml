@@ -6,7 +6,7 @@
         android:icon="@drawable/ic_language"
         android:orderInCategory="15"
         android:title="@string/action_translate_lyrics"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_sleep_timer"
         android:icon="@drawable/ic_sleep_timer"
